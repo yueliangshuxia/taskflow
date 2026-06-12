@@ -1,0 +1,36 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+.sonarlint/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+
+# Application
+application-local.yml
+application-dev-local.yml
+
+# Spring Boot
+*.pid
+heapdump.*
+
+# Env
+.env

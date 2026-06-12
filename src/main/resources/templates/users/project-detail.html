@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header-custom">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-folder-open"></i> <span th:text="${project.name}">项目名</span></h2>
+                <p class="mb-0" th:text="${project.description} ?: '暂无描述'"></p>
+            </div>
+            <div>
+                <a th:href="@{/projects/{id}/edit(id=${project.id})}" class="btn btn-light btn-sm me-1">
+                    <i class="fas fa-edit"></i> 编辑
+                </a>
+                <a th:href="@{/projects/{id}/tasks/create(id=${project.id})}" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus"></i> 新建任务
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-tasks text-primary"></i> 任务列表</span>
+                    <a th:href="@{/projects/{id}/tasks/create(id=${project.id})}" class="btn btn-sm btn-success">
+                        <i class="fas fa-plus"></i> 新建
+                    </a>
+                </div>
+                <div class="card-body">
+                    <th:block th:if="${#lists.isEmpty(tasks)}">
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h4>暂无任务</h4>
+                            <a th:href="@{/projects/{id}/tasks/create(id=${project.id})}" class="btn btn-success">
+                                <i class="fas fa-plus"></i> 创建第一个任务
+                            </a>
+                        </div>
+                    </th:block>
+                    <div th:unless="${#lists.isEmpty(tasks)}" class="list-group list-group-flush">
+                        <a th:each="task : ${tasks}"
+                             th:href="@{/tasks/{id}(id=${task.id})}"
+                             class="list-group-item list-group-item-action px-0"
+                             th:classappend="'priority-' + ${task.priority.name()}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold" th:text="${task.title}">任务标题</span>
+                                    <div class="mt-1">
+                                        <span th:class="'badge badge-' + ${task.status.name().toLowerCase().replace('_', '-')}"
+                                              th:text="${task.status.displayName}">状态</span>
+                                        <span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}"
+                                              th:text="${task.priority.displayName}">优先级</span>
+                                    </div>
+                                </div>
+                                <div class="text-end text-muted small">
+                                    <div th:if="${task.assigneeName}">
+                                        <i class="fas fa-user"></i> <span th:text="${task.assigneeName}">指派人</span>
+                                    </div>
+                                    <div th:if="${task.dueDate}">
+                                        <i class="fas fa-calendar"></i> <span th:text="${task.dueDate}">截止日</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header"><i class="fas fa-info-circle text-primary"></i> 项目信息</div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr><td class="ps-0 text-muted">创建者</td><td class="pe-0 text-end fw-semibold" th:text="${project.ownerName}">owner</td></tr>
+                        <tr><td class="ps-0 text-muted">任务数</td><td class="pe-0 text-end fw-semibold"><span th:text="${project.taskCount}">0</span></td></tr>
+                        <tr><td class="ps-0 text-muted">成员数</td><td class="pe-0 text-end fw-semibold"><span th:text="${project.memberCount}">0</span></td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header"><i class="fas fa-users text-success"></i> 成员</div>
+                <div class="card-body">
+                    <th:block th:if="${#lists.isEmpty(members)}">
+                        <p class="text-muted mb-0">暂无成员</p>
+                    </th:block>
+                    <ul th:unless="${#lists.isEmpty(members)}" class="list-unstyled mb-0">
+                        <li th:each="member : ${members}" class="py-1 d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="fas fa-user-circle text-primary me-2"></i>
+                                <span th:text="${member.displayName}">成员名</span>
+                                <small class="text-muted" th:if="${member.username == project.ownerName}">(所有者)</small>
+                            </span>
+                            <form th:if="${currentUsername == project.ownerName and member.username != project.ownerName}"
+                                  method="post" th:action="@{/projects/{id}/members/remove(id=${project.id})}"
+                                  class="d-inline">
+                                <input type="hidden" name="userId" th:value="${member.id}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm py-0"
+                                        onclick="return confirm('确定移除该成员？')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+
+                    <hr th:if="${currentUsername == project.ownerName and not #lists.isEmpty(availableUsers)}">
+                    <form th:if="${currentUsername == project.ownerName and not #lists.isEmpty(availableUsers)}"
+                          method="post" th:action="@{/projects/{id}/members/add(id=${project.id})}"
+                          class="d-flex gap-2">
+                        <select name="userId" class="form-select form-select-sm" required>
+                            <option value="">选择用户...</option>
+                            <option th:each="user : ${availableUsers}"
+                                    th:value="${user.id}"
+                                    th:text="${user.displayName + ' (' + user.username + ')'}"></option>
+                        </select>
+                        <button type="submit" class="btn btn-success btn-sm flex-shrink-0">
+                            <i class="fas fa-plus"></i> 添加
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><i class="fas fa-cog text-secondary"></i> 操作</div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/projects/{id}/tasks/create(id=${project.id})}" class="btn btn-success"><i class="fas fa-plus"></i> 创建任务</a>
+                        <a th:href="@{/projects/{id}/edit(id=${project.id})}" class="btn btn-outline-primary"><i class="fas fa-edit"></i> 编辑项目</a>
+                        <form method="post" th:action="@{/projects/{id}/delete(id=${project.id})}"
+                              onsubmit="return confirm('确定要删除此项目吗？')">
+                            <button type="submit" class="btn btn-outline-danger w-100"><i class="fas fa-trash"></i> 删除项目</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

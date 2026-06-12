@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header rounded-3 mb-4">
+        <div class="container-fluid">
+            <h2><i class="fas fa-user-cog"></i> 个人资料</h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Profile Info Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> 基本信息</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" th:action="@{/profile}">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">用户名</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" th:value="${user.username}" readonly disabled>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">显示名称</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="displayName" class="form-control"
+                                       th:value="${user.displayName}" placeholder="你的显示名称">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">邮箱</label>
+                            <div class="col-sm-9">
+                                <input type="email" name="email" class="form-control"
+                                       th:value="${user.email}" placeholder="your@email.com" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">角色</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control"
+                                       th:value="${user.role.displayName}" readonly disabled>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> 保存修改
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-key"></i> 修改密码</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" th:action="@{/profile/password}">
+                        <div class="mb-3">
+                            <label class="form-label">当前密码</label>
+                            <input type="password" name="oldPassword" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">新密码</label>
+                            <input type="password" name="newPassword" class="form-control" required minlength="6">
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-key"></i> 修改密码
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

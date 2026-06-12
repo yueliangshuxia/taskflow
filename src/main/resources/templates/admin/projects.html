@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header rounded-3 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container-fluid">
+            <h2><i class="fas fa-folder-open"></i> 项目管理</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-folder-open"></i> 项目列表</span>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#resetIdModal">
+                <i class="fas fa-sync"></i> 重置 ID
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>项目名称</th>
+                            <th>创建者</th>
+                            <th>任务数</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="project : ${projects}">
+                            <td th:text="${project.id}">1</td>
+                            <td>
+                                <i class="fas fa-folder text-primary"></i>
+                                <a th:href="@{/projects/{id}(id=${project.id})}" th:text="${project.name}">项目名</a>
+                            </td>
+                            <td th:text="${project.owner.username}">创建者</td>
+                            <td><span class="badge bg-info">-</span></td>
+                            <td class="small" th:text="${project.createdAt}">时间</td>
+                            <td>
+                                <form method="post" th:action="@{/admin/projects/{id}/delete(id=${project.id})}"
+                                      onsubmit="return confirm('确定要删除此项目吗？')" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash"></i> 删除
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(projects)}">
+                            <td colspan="6" class="text-center text-muted">暂无项目</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav th:if="${totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/projects(page=${currentPage - 1})}">上一页</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        class="page-item" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/projects(page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/projects(page=${currentPage + 1})}">下一页</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Reset ID Confirmation Modal -->
+    <div class="modal fade" id="resetIdModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-sync"></i> 重置项目 ID</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-1">确定要重置项目 ID 吗？</p>
+                    <p class="text-warning small mb-0"><i class="fas fa-exclamation-triangle"></i> 仅当没有任何项目时才能重置，重置后新项目的 ID 将从 1 开始。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+                    <form method="post" th:action="@{/admin/projects/reset-id}" class="d-inline">
+                        <button type="submit" class="btn btn-warning btn-sm">
+                            <i class="fas fa-sync"></i> 确认重置
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

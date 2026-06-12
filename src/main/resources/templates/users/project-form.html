@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header rounded-3 mb-4">
+        <div class="container-fluid">
+            <h2><i class="fas" th:classappend="${project.id != null} ? 'fa-edit' : 'fa-plus'"></i>
+                <span th:text="${project.id != null} ? '编辑项目' : '创建项目'"></span></h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" th:action="${project.id != null} ? @{/projects/{id}/edit(id=${project.id})} : @{/projects/create}">
+                        <div class="mb-3">
+                            <label class="form-label">项目名称 <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control form-control-lg"
+                                   th:value="${project.name}" placeholder="输入项目名称" required maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">项目描述</label>
+                            <textarea name="description" class="form-control" rows="5"
+                                      placeholder="描述这个项目的目的和范围" maxlength="2000"
+                                      th:text="${project.description}"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/projects}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> 返回
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span th:text="${project.id != null} ? '保存修改' : '创建项目'"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

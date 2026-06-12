@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header-custom">
+        <h2><i class="fas fa-chart-bar"></i> 管理仪表盘</h2>
+        <p>系统全局统计概览</p>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card stat-gradient-1 fade-in">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number" th:text="${stats.totalUsers}">0</div>
+                        <div class="stat-label">用户总数</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c); animation-delay: 0.1s">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number" th:text="${stats.totalProjects}">0</div>
+                        <div class="stat-label">项目总数</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-folder-open"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe); animation-delay: 0.2s">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number" th:text="${stats.totalTasks}">0</div>
+                        <div class="stat-label">任务总数</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b, #38f9d7); animation-delay: 0.3s">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number" th:text="${stats.totalUsers > 0 ? stats.totalTasks / stats.totalUsers : 0}">0</div>
+                        <div class="stat-label">人均任务数</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-chart-pie text-primary"></i> 任务状态分布</div>
+                <div class="card-body">
+                    <div class="chart-container"><canvas id="statusChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-chart-bar text-info"></i> 任务优先级分布</div>
+                <div class="card-body">
+                    <div class="chart-container"><canvas id="priorityChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-link text-success"></i> 快捷管理</div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-3"><a th:href="@{/admin/users}" class="btn btn-outline-primary w-100"><i class="fas fa-users"></i> 用户管理</a></div>
+                        <div class="col-md-3"><a th:href="@{/admin/projects}" class="btn btn-outline-success w-100"><i class="fas fa-folder-open"></i> 项目管理</a></div>
+                        <div class="col-md-3"><a th:href="@{/admin/tasks}" class="btn btn-outline-info w-100"><i class="fas fa-tasks"></i> 任务管理</a></div>
+                        <div class="col-md-3"><a th:href="@{/admin/logs}" class="btn btn-outline-secondary w-100"><i class="fas fa-history"></i> 审计日志</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            var statusData = [[${stats.tasksByStatus}]];
+            var priorityData = [[${stats.tasksByPriority}]];
+            new Chart(document.getElementById('statusChart'), {
+                type: 'pie',
+                data: { labels: Object.keys(statusData), datasets: [{ data: Object.values(statusData), backgroundColor: ['#94a3b8', '#4f46e5', '#10b981'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+            new Chart(document.getElementById('priorityChart'), {
+                type: 'doughnut',
+                data: { labels: Object.keys(priorityData), datasets: [{ data: Object.values(priorityData), backgroundColor: ['#94a3b8', '#f59e0b', '#fb923c', '#ef4444'] }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'bottom' } } }
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

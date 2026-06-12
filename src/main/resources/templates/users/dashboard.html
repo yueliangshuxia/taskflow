@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header-custom">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-home"></i> 仪表盘</h2>
+                <p>欢迎回来，<span sec:authentication="name"></span>！</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card stat-gradient-1 fade-in">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number" th:text="${stats.totalProjects}">0</div>
+                        <div class="stat-label">我的项目</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-folder"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-gradient-2 fade-in" style="animation-delay: 0.1s">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number" th:text="${stats.totalTasks}">0</div>
+                        <div class="stat-label">总任务</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-gradient-3 fade-in" style="animation-delay: 0.2s">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number" th:text="${stats.inProgressTasks}">0</div>
+                        <div class="stat-label">进行中</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-spinner"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-gradient-4 fade-in" style="animation-delay: 0.3s">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number" th:text="${stats.doneTasks}">0</div>
+                        <div class="stat-label">已完成</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar text-primary"></i> 任务概览
+                </div>
+                <div class="card-body">
+                    <div class="row text-center" id="chartDataDisplay">
+                        <div class="col-4">
+                            <div class="display-6 text-secondary fw-bold" th:text="${stats.todoTasks}">0</div>
+                            <div class="text-muted small">待办</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="display-6 text-primary fw-bold" th:text="${stats.inProgressTasks}">0</div>
+                            <div class="text-muted small">进行中</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="display-6 text-success fw-bold" th:text="${stats.doneTasks}">0</div>
+                            <div class="text-muted small">已完成</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-bolt text-warning"></i> 快捷操作
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/projects/create}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> 创建项目
+                        </a>
+                        <a th:href="@{/projects}" class="btn btn-outline-primary">
+                            <i class="fas fa-folder-open"></i> 查看项目
+                        </a>
+                        <a th:href="@{/profile}" class="btn btn-outline-secondary">
+                            <i class="fas fa-user-cog"></i> 编辑资料
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-4" th:if="${stats.overdueTasks > 0}">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 2.5rem;"></i>
+                    <h5 class="mt-2">你有 <span class="text-danger fw-bold" th:text="${stats.overdueTasks}">0</span> 个逾期任务</h5>
+                    <a th:href="@{/projects}" class="btn btn-sm btn-outline-danger mt-2"><i class="fas fa-eye"></i> 查看详情</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        try {
+            document.addEventListener('DOMContentLoaded', function() {
+                var display = document.getElementById('chartDataDisplay');
+                if (!display || typeof Chart === 'undefined') return;
+                var els = display.querySelectorAll('.fw-bold');
+                var todo = parseInt(els[0].textContent) || 0;
+                var progress = parseInt(els[1].textContent) || 0;
+                var done = parseInt(els[2].textContent) || 0;
+
+                var canvas = document.createElement('canvas');
+                var container = display.parentNode;
+                display.style.display = 'none';
+                var div = document.createElement('div');
+                div.className = 'chart-container';
+                div.appendChild(canvas);
+                container.appendChild(div);
+
+                new Chart(canvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['待办', '进行中', '已完成'],
+                        datasets: [{
+                            data: [todo, progress, done],
+                            backgroundColor: ['#94a3b8', '#4f46e5', '#10b981'],
+                            borderWidth: 0,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '65%',
+                        plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, font: { size: 13 } } } }
+                    }
+                });
+            });
+        } catch(e) { console.log('Chart init:', e); }
+    </script>
+</div>
+</body>
+</html>

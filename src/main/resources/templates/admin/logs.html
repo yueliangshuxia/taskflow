@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header rounded-3 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container-fluid">
+            <h2><i class="fas fa-history"></i> 审计日志</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>操作</th>
+                            <th>对象类型</th>
+                            <th>对象ID</th>
+                            <th>详情</th>
+                            <th>操作者</th>
+                            <th>时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="log : ${logs}">
+                            <td th:text="${log.id}">1</td>
+                            <td>
+                                <span class="badge bg-success" th:if="${log.action == 'CREATE' or log.action == 'REGISTER'}" th:text="${log.action}">操作</span>
+                                <span class="badge bg-danger" th:if="${log.action == 'DELETE'}" th:text="${log.action}">操作</span>
+                                <span class="badge bg-warning text-dark" th:if="${log.action == 'CHANGE_ROLE' or log.action == 'UPDATE_STATUS'}" th:text="${log.action}">操作</span>
+                                <span class="badge bg-primary" th:if="${log.action == 'ADD_MEMBER' or log.action == 'REMOVE_MEMBER'}" th:text="${log.action}">操作</span>
+                                <span class="badge bg-secondary" th:if="${log.action == 'RESET_ID'}" th:text="${log.action}">操作</span>
+                                <span class="badge bg-info" th:if="${log.action != 'CREATE' and log.action != 'REGISTER' and log.action != 'DELETE' and log.action != 'CHANGE_ROLE' and log.action != 'UPDATE_STATUS' and log.action != 'ADD_MEMBER' and log.action != 'REMOVE_MEMBER' and log.action != 'RESET_ID'}" th:text="${log.action}">操作</span>
+                            </td>
+                            <td th:text="${log.entityType}">对象类型</td>
+                            <td th:text="${log.entityId}">对象ID</td>
+                            <td class="small text-muted" th:text="${log.details}">详情</td>
+                            <td th:text="${log.performedBy}">操作者</td>
+                            <td class="small" th:text="${log.performedAt}">时间</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(logs)}">
+                            <td colspan="7" class="text-center text-muted">暂无日志记录</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav th:if="${totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/logs(page=${currentPage - 1})}">上一页</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        class="page-item" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/logs(page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/logs(page=${currentPage + 1})}">下一页</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</body>
+</html>

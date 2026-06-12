@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - TaskFlow</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .card { border: none; border-radius: 1rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); }
+        .btn-primary { border-radius: 2rem; padding: 0.5rem 2rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header text-center pt-4">
+                        <h2><i class="fas fa-tasks text-primary"></i> TaskFlow</h2>
+                        <p class="text-muted">创建新账号</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" th:action="@{/register}" th:object="${user}">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label"><i class="fas fa-user"></i> 用户名 *</label>
+                                    <input type="text" th:field="*{username}"
+                                           class="form-control" placeholder="3-50个字符" required>
+                                    <div th:if="${#fields.hasErrors('username')}"
+                                         class="text-danger small" th:errors="*{username}"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label"><i class="fas fa-envelope"></i> 邮箱 *</label>
+                                    <input type="email" th:field="*{email}"
+                                           class="form-control" placeholder="your@email.com" required>
+                                    <div th:if="${#fields.hasErrors('email')}"
+                                         class="text-danger small" th:errors="*{email}"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-id-card"></i> 显示名称</label>
+                                <input type="text" th:field="*{displayName}"
+                                       class="form-control" placeholder="选填，默认使用用户名">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label"><i class="fas fa-lock"></i> 密码 *</label>
+                                    <input type="password" th:field="*{password}"
+                                           class="form-control" placeholder="至少6个字符" required>
+                                    <div th:if="${#fields.hasErrors('password')}"
+                                         class="text-danger small" th:errors="*{password}"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label"><i class="fas fa-lock"></i> 确认密码 *</label>
+                                    <input type="password" th:field="*{confirmPassword}"
+                                           class="form-control" placeholder="再次输入密码" required>
+                                    <div th:if="${#fields.hasErrors('confirmPassword')}"
+                                         class="text-danger small" th:errors="*{confirmPassword}"></div>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 mt-3">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-user-plus"></i> 注册
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <p class="mb-0">已有账号？ <a th:href="@{/login}" class="text-primary">立即登录</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

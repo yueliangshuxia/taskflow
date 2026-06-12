@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header rounded-3 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container-fluid">
+            <h2><i class="fas" th:classappend="${user.id != null} ? 'fa-edit' : 'fa-plus'"></i>
+                <span th:text="${user.id != null} ? '编辑用户' : '创建用户'"></span></h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" th:action="${user.id != null} ? @{/admin/users/{id}/edit(id=${user.id})} : @{/admin/users/create}">
+                        <div class="mb-3">
+                            <label class="form-label">用户名</label>
+                            <input type="text" name="username" class="form-control"
+                                   th:value="${user.username}" th:disabled="${user.id != null}"
+                                   placeholder="用户名" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">显示名称</label>
+                            <input type="text" name="displayName" class="form-control"
+                                   th:value="${user.displayName}" placeholder="显示名称">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">邮箱</label>
+                            <input type="email" name="email" class="form-control"
+                                   th:value="${user.email}" placeholder="email@example.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">密码 <span th:if="${user.id == null}" class="text-danger">*</span>
+                                <small th:if="${user.id != null}" class="text-muted">(留空则不修改)</small></label>
+                            <input type="password" name="password" class="form-control"
+                                   th:required="${user.id == null}" placeholder="密码" minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">角色</label>
+                            <select name="role" class="form-select">
+                                <option value="USER" th:selected="${user.role == null or user.role.name() == 'USER'}">普通用户</option>
+                                <option value="ADMIN" th:selected="${user.role != null and user.role.name() == 'ADMIN'}">管理员</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/admin/users}" class="btn btn-secondary">返回</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> 保存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="400" y2="300">
+      <stop offset="0%" stop-color="#667eea" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#764ba2" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" rx="20" fill="url(#g1)"/>
+
+  <!-- 装饰圆圈 -->
+  <circle cx="80" cy="70" r="40" fill="#667eea" opacity="0.08"/>
+  <circle cx="320" cy="230" r="55" fill="#764ba2" opacity="0.08"/>
+  <circle cx="350" cy="50" r="20" fill="#10b981" opacity="0.06"/>
+
+  <!-- 三个任务卡片 -->
+  <g transform="translate(50, 60)">
+    <rect x="0" y="0" width="120" height="16" rx="8" fill="#e2e8f0" stroke="#667eea" stroke-width="1.5"/>
+    <circle cx="10" cy="8" r="3" fill="#667eea"/>
+  </g>
+  <g transform="translate(60, 95)">
+    <rect x="0" y="0" width="140" height="16" rx="8" fill="#e2e8f0" stroke="#667eea" stroke-width="1.5"/>
+    <circle cx="10" cy="8" r="3" fill="#f59e0b"/>
+  </g>
+  <g transform="translate(55, 130)">
+    <rect x="0" y="0" width="130" height="16" rx="8" fill="#e2e8f0" stroke="#10b981" stroke-width="1.5"/>
+    <circle cx="10" cy="8" r="3" fill="#10b981"/>
+  </g>
+
+  <!-- 右侧图表 -->
+  <rect x="220" y="60" width="130" height="130" rx="12" fill="#fff" stroke="#e2e8f0" stroke-width="1.5"/>
+  <rect x="240" y="110" width="25" height="55" rx="4" fill="#667eea" opacity="0.7"/>
+  <rect x="275" y="130" width="25" height="35" rx="4" fill="#f59e0b" opacity="0.7"/>
+  <rect x="310" y="95" width="25" height="70" rx="4" fill="#10b981" opacity="0.7"/>
+
+  <!-- 对勾 -->
+  <g transform="translate(180, 185)">
+    <circle cx="15" cy="15" r="40" fill="#10b981" opacity="0.1"/>
+    <circle cx="15" cy="15" r="25" fill="#10b981" opacity="0.15"/>
+    <path d="M3 15 L11 23 L27 7" stroke="#10b981" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

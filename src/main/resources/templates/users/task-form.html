@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header rounded-3 mb-4">
+        <div class="container-fluid">
+            <h2><i class="fas" th:classappend="${task.id != null} ? 'fa-edit' : 'fa-plus'"></i>
+                <span th:text="${task.id != null} ? '编辑任务' : '创建任务'"></span></h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post"
+                          th:action="${task.id != null} ? @{/tasks/{id}/edit(id=${task.id})} : @{/projects/{id}/tasks/create(id=${project.id})}">
+
+                        <div class="mb-3">
+                            <label class="form-label">任务标题 <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control form-control-lg"
+                                   th:value="${task.title}" placeholder="输入任务标题" required maxlength="200">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">任务描述</label>
+                            <textarea name="description" class="form-control" rows="5"
+                                      placeholder="描述任务的具体内容和要求" maxlength="5000"
+                                      th:text="${task.description}"></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">优先级</label>
+                                <select name="priority" class="form-select">
+                                    <option value="LOW" th:selected="${task.priority != null and task.priority.name() == 'LOW'}">低</option>
+                                    <option value="MEDIUM" th:selected="${task.priority == null or task.priority.name() == 'MEDIUM'}">中</option>
+                                    <option value="HIGH" th:selected="${task.priority != null and task.priority.name() == 'HIGH'}">高</option>
+                                    <option value="URGENT" th:selected="${task.priority != null and task.priority.name() == 'URGENT'}">紧急</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">截止日期</label>
+                                <input type="date" name="dueDate" class="form-control"
+                                       th:value="${task.dueDate}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">指派人</label>
+                            <select name="assigneeId" class="form-select">
+                                <option value="">不指定</option>
+                                <option th:each="member : ${members}"
+                                        th:value="${member.id}"
+                                        th:selected="${task.assigneeId != null and task.assigneeId == member.id}"
+                                        th:text="${member.displayName + ' (' + member.username + ')'}">成员</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a th:href="${task.id != null} ? @{/tasks/{id}(id=${task.id})} : @{/projects/{id}(id=${project != null ? project.id : task.projectId})}"
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> 返回
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span th:text="${task.id != null} ? '保存修改' : '创建任务'"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
