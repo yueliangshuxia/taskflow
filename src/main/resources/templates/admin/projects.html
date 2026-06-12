@@ -7,15 +7,15 @@
 <div th:fragment="content">
     <div class="page-header rounded-3 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container-fluid">
-            <h2><i class="fas fa-folder-open"></i> 项目管理</h2>
+            <h2><i class="fas fa-folder-open"></i> <span th:text="#{admin.projects.title}">项目管理</span></h2>
         </div>
     </div>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-folder-open"></i> 项目列表</span>
+            <span><i class="fas fa-folder-open"></i> <span th:text="#{admin.projects.title}">项目列表</span></span>
             <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#resetIdModal">
-                <i class="fas fa-sync"></i> 重置 ID
+                <i class="fas fa-sync"></i> <span th:text="#{admin.projects.reset.id}">重置 ID</span>
             </button>
         </div>
         <div class="card-body">
@@ -23,12 +23,12 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>项目名称</th>
-                            <th>创建者</th>
-                            <th>任务数</th>
-                            <th>创建时间</th>
-                            <th>操作</th>
+                            <th th:text="#{admin.users.id}">ID</th>
+                            <th th:text="#{project.name}">项目名称</th>
+                            <th th:text="#{project.creator}">创建者</th>
+                            <th th:text="#{project.task.count}">任务数</th>
+                            <th th:text="#{admin.users.created.at}">创建时间</th>
+                            <th th:text="#{admin.users.actions}">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,15 +43,15 @@
                             <td class="small" th:text="${project.createdAt}">时间</td>
                             <td>
                                 <form method="post" th:action="@{/admin/projects/{id}/delete(id=${project.id})}"
-                                      onsubmit="return confirm('确定要删除此项目吗？')" class="d-inline">
+                                      th:onsubmit="'return confirm(\'' + #{project.delete.confirm} + '\')'" class="d-inline">
                                     <button type="submit" class="btn btn-outline-danger btn-sm">
-                                        <i class="fas fa-trash"></i> 删除
+                                        <i class="fas fa-trash"></i> <span th:text="#{common.delete}">删除</span>
                                     </button>
                                 </form>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(projects)}">
-                            <td colspan="6" class="text-center text-muted">暂无项目</td>
+                            <td colspan="6" class="text-center text-muted" th:text="#{admin.projects.no.data}">暂无项目</td>
                         </tr>
                     </tbody>
                 </table>
@@ -60,37 +60,36 @@
             <nav th:if="${totalPages > 1}">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/projects(page=${currentPage - 1})}">上一页</a>
+                        <a class="page-link" th:href="@{/admin/projects(page=${currentPage - 1})}" th:text="#{pagination.previous}">上一页</a>
                     </li>
                     <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                         class="page-item" th:classappend="${i == currentPage} ? 'active'">
                         <a class="page-link" th:href="@{/admin/projects(page=${i})}" th:text="${i + 1}">1</a>
                     </li>
                     <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/projects(page=${currentPage + 1})}">下一页</a>
+                        <a class="page-link" th:href="@{/admin/projects(page=${currentPage + 1})}" th:text="#{pagination.next}">下一页</a>
                     </li>
                 </ul>
             </nav>
         </div>
     </div>
 
-    <!-- Reset ID Confirmation Modal -->
     <div class="modal fade" id="resetIdModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-sync"></i> 重置项目 ID</h5>
+                    <h5 class="modal-title"><i class="fas fa-sync"></i> <span th:text="#{admin.projects.reset.id}">重置项目 ID</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-1">确定要重置项目 ID 吗？</p>
-                    <p class="text-warning small mb-0"><i class="fas fa-exclamation-triangle"></i> 仅当没有任何项目时才能重置，重置后新项目的 ID 将从 1 开始。</p>
+                    <p class="mb-1" th:text="#{admin.projects.reset.confirm}">确定要重置项目 ID 吗？</p>
+                    <p class="text-warning small mb-0"><i class="fas fa-exclamation-triangle"></i> <span th:text="#{admin.projects.reset.warning}">仅当没有任何项目时才能重置，重置后新项目的 ID 将从 1 开始。</span></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" th:text="#{common.cancel}">取消</button>
                     <form method="post" th:action="@{/admin/projects/reset-id}" class="d-inline">
                         <button type="submit" class="btn btn-warning btn-sm">
-                            <i class="fas fa-sync"></i> 确认重置
+                            <i class="fas fa-sync"></i> <span th:text="#{admin.projects.reset.confirm.btn}">确认重置</span>
                         </button>
                     </form>
                 </div>

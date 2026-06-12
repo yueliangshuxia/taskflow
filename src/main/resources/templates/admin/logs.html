@@ -7,7 +7,7 @@
 <div th:fragment="content">
     <div class="page-header rounded-3 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container-fluid">
-            <h2><i class="fas fa-history"></i> 审计日志</h2>
+            <h2><i class="fas fa-history"></i> <span th:text="#{admin.logs.title}">审计日志</span></h2>
         </div>
     </div>
 
@@ -17,13 +17,13 @@
                 <table class="table table-hover table-sm">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>操作</th>
-                            <th>对象类型</th>
-                            <th>对象ID</th>
-                            <th>详情</th>
-                            <th>操作者</th>
-                            <th>时间</th>
+                            <th th:text="#{admin.users.id}">ID</th>
+                            <th th:text="#{admin.logs.action}">操作</th>
+                            <th th:text="#{admin.logs.entity.type}">对象类型</th>
+                            <th th:text="#{admin.logs.entity.id}">对象ID</th>
+                            <th th:text="#{admin.logs.details}">详情</th>
+                            <th th:text="#{admin.logs.operator}">操作者</th>
+                            <th th:text="#{admin.logs.time}">时间</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,7 +44,7 @@
                             <td class="small" th:text="${log.performedAt}">时间</td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(logs)}">
-                            <td colspan="7" class="text-center text-muted">暂无日志记录</td>
+                            <td colspan="7" class="text-center text-muted" th:text="#{admin.logs.no.data}">暂无日志记录</td>
                         </tr>
                     </tbody>
                 </table>
@@ -53,14 +53,14 @@
             <nav th:if="${totalPages > 1}">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/logs(page=${currentPage - 1})}">上一页</a>
+                        <a class="page-link" th:href="@{/admin/logs(page=${currentPage - 1})}" th:text="#{pagination.previous}">上一页</a>
                     </li>
                     <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                         class="page-item" th:classappend="${i == currentPage} ? 'active'">
                         <a class="page-link" th:href="@{/admin/logs(page=${i})}" th:text="${i + 1}">1</a>
                     </li>
                     <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/logs(page=${currentPage + 1})}">下一页</a>
+                        <a class="page-link" th:href="@{/admin/logs(page=${currentPage + 1})}" th:text="#{pagination.next}">下一页</a>
                     </li>
                 </ul>
             </nav>

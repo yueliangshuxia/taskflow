@@ -7,16 +7,16 @@
 <div th:fragment="content">
     <div class="page-header-custom">
         <a th:href="@{/messages}" class="btn btn-outline-secondary btn-sm mb-2">
-            <i class="fas fa-arrow-left"></i> 返回收件箱
+            <i class="fas fa-arrow-left"></i> <span th:text="#{message.back.inbox}">返回收件箱</span>
         </a>
-        <h2><i class="fas fa-envelope"></i> 消息详情</h2>
+        <h2><i class="fas fa-envelope"></i> <span th:text="#{message.detail}">消息详情</span></h2>
     </div>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <strong th:text="${msg.subject}">主题</strong>
-                <span th:if="${!msg.isRead}" class="badge bg-primary ms-2">未读</span>
+                <span th:if="${!msg.isRead}" class="badge bg-primary ms-2" th:text="#{message.unread}">未读</span>
             </div>
             <small class="text-muted" th:text="${msg.createdAt}">时间</small>
         </div>
@@ -24,15 +24,15 @@
             <div class="mb-3">
                 <table class="table table-borderless mb-0 small">
                     <tr>
-                        <td class="text-muted" style="width: 80px;">发件人</td>
+                        <td class="text-muted" style="width: 80px;" th:text="#{message.sender}">发件人</td>
                         <td><strong th:text="${msg.sender.displayName}">发件人</strong> (<span th:text="${msg.sender.username}">username</span>)</td>
                     </tr>
                     <tr>
-                        <td class="text-muted">收件人</td>
+                        <td class="text-muted" th:text="#{message.recipient}">收件人</td>
                         <td><strong th:text="${msg.recipient.displayName}">收件人</strong> (<span th:text="${msg.recipient.username}">username</span>)</td>
                     </tr>
                     <tr th:if="${msg.readAt}">
-                        <td class="text-muted">已读时间</td>
+                        <td class="text-muted" th:text="#{message.read.time}">已读时间</td>
                         <td><span th:text="${msg.readAt}">时间</span></td>
                     </tr>
                 </table>
@@ -44,10 +44,10 @@
         </div>
         <div class="card-footer">
             <a th:href="@{/messages/compose}" class="btn btn-primary btn-sm">
-                <i class="fas fa-reply"></i> 回复
+                <i class="fas fa-reply"></i> <span th:text="#{message.reply}">回复</span>
             </a>
             <a th:href="@{/messages}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-list"></i> 返回列表
+                <i class="fas fa-list"></i> <span th:text="#{message.back.list}">返回列表</span>
             </a>
         </div>
     </div>

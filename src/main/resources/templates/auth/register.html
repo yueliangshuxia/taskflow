@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>注册 - TaskFlow</title>
+    <title th:text="#{auth.register.page.title}">注册 - TaskFlow</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <style>
@@ -19,20 +19,20 @@
                 <div class="card">
                     <div class="card-header text-center pt-4">
                         <h2><i class="fas fa-tasks text-primary"></i> TaskFlow</h2>
-                        <p class="text-muted">创建新账号</p>
+                        <p class="text-muted" th:text="#{auth.register.subtitle}">创建新账号</p>
                     </div>
                     <div class="card-body p-4">
                         <form method="post" th:action="@{/register}" th:object="${user}">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label"><i class="fas fa-user"></i> 用户名 *</label>
+                                    <label class="form-label"><i class="fas fa-user"></i> <span th:text="#{auth.register.username}">用户名 *</span></label>
                                     <input type="text" th:field="*{username}"
-                                           class="form-control" placeholder="3-50个字符" required>
+                                           class="form-control" th:placeholder="#{auth.register.username.placeholder}" placeholder="3-50个字符" required>
                                     <div th:if="${#fields.hasErrors('username')}"
                                          class="text-danger small" th:errors="*{username}"></div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label"><i class="fas fa-envelope"></i> 邮箱 *</label>
+                                    <label class="form-label"><i class="fas fa-envelope"></i> <span th:text="#{auth.register.email}">邮箱 *</span></label>
                                     <input type="email" th:field="*{email}"
                                            class="form-control" placeholder="your@email.com" required>
                                     <div th:if="${#fields.hasErrors('email')}"
@@ -40,35 +40,35 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label"><i class="fas fa-id-card"></i> 显示名称</label>
+                                <label class="form-label"><i class="fas fa-id-card"></i> <span th:text="#{auth.register.display.name}">显示名称</span></label>
                                 <input type="text" th:field="*{displayName}"
-                                       class="form-control" placeholder="选填，默认使用用户名">
+                                       class="form-control" th:placeholder="#{auth.register.display.name.placeholder}" placeholder="选填，默认使用用户名">
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label"><i class="fas fa-lock"></i> 密码 *</label>
+                                    <label class="form-label"><i class="fas fa-lock"></i> <span th:text="#{auth.register.password}">密码 *</span></label>
                                     <input type="password" th:field="*{password}"
-                                           class="form-control" placeholder="至少6个字符" required>
+                                           class="form-control" th:placeholder="#{auth.register.password.placeholder}" placeholder="至少6个字符" required>
                                     <div th:if="${#fields.hasErrors('password')}"
                                          class="text-danger small" th:errors="*{password}"></div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label"><i class="fas fa-lock"></i> 确认密码 *</label>
+                                    <label class="form-label"><i class="fas fa-lock"></i> <span th:text="#{auth.register.confirm.password}">确认密码 *</span></label>
                                     <input type="password" th:field="*{confirmPassword}"
-                                           class="form-control" placeholder="再次输入密码" required>
+                                           class="form-control" th:placeholder="#{auth.register.confirm.password.placeholder}" placeholder="再次输入密码" required>
                                     <div th:if="${#fields.hasErrors('confirmPassword')}"
                                          class="text-danger small" th:errors="*{confirmPassword}"></div>
                                 </div>
                             </div>
                             <div class="d-grid gap-2 mt-3">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-user-plus"></i> 注册
+                                    <i class="fas fa-user-plus"></i> <span th:text="#{auth.register.submit}">注册</span>
                                 </button>
                             </div>
                         </form>
 
                         <div class="text-center mt-3">
-                            <p class="mb-0">已有账号？ <a th:href="@{/login}" class="text-primary">立即登录</a></p>
+                            <p class="mb-0"><span th:text="#{auth.register.has.account}">已有账号？</span> <a th:href="@{/login}" class="text-primary" th:text="#{auth.register.login}">立即登录</a></p>
                         </div>
                     </div>
                 </div>

@@ -6,8 +6,8 @@
 <body>
 <div th:fragment="content">
     <div class="page-header-custom">
-        <h2><i class="fas fa-chart-bar"></i> 管理仪表盘</h2>
-        <p>系统全局统计概览</p>
+        <h2><i class="fas fa-chart-bar"></i> <span th:text="#{admin.dashboard.title}">管理仪表盘</span></h2>
+        <p th:text="#{admin.dashboard.subtitle}">系统全局统计概览</p>
     </div>
 
     <div class="row g-4 mb-4">
@@ -16,7 +16,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="stat-number" th:text="${stats.totalUsers}">0</div>
-                        <div class="stat-label">用户总数</div>
+                        <div class="stat-label" th:text="#{admin.dashboard.total.users}">用户总数</div>
                     </div>
                     <div class="stat-icon"><i class="fas fa-users"></i></div>
                 </div>
@@ -27,7 +27,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="stat-number" th:text="${stats.totalProjects}">0</div>
-                        <div class="stat-label">项目总数</div>
+                        <div class="stat-label" th:text="#{admin.dashboard.total.projects}">项目总数</div>
                     </div>
                     <div class="stat-icon"><i class="fas fa-folder-open"></i></div>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="stat-number" th:text="${stats.totalTasks}">0</div>
-                        <div class="stat-label">任务总数</div>
+                        <div class="stat-label" th:text="#{admin.dashboard.total.tasks}">任务总数</div>
                     </div>
                     <div class="stat-icon"><i class="fas fa-tasks"></i></div>
                 </div>
@@ -49,7 +49,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="stat-number" th:text="${stats.totalUsers > 0 ? stats.totalTasks / stats.totalUsers : 0}">0</div>
-                        <div class="stat-label">人均任务数</div>
+                        <div class="stat-label" th:text="#{admin.dashboard.tasks.per.user}">人均任务数</div>
                     </div>
                     <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
                 </div>
@@ -60,7 +60,7 @@
     <div class="row g-4">
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header"><i class="fas fa-chart-pie text-primary"></i> 任务状态分布</div>
+                <div class="card-header"><i class="fas fa-chart-pie text-primary"></i> <span th:text="#{admin.dashboard.status.distribution}">任务状态分布</span></div>
                 <div class="card-body">
                     <div class="chart-container"><canvas id="statusChart"></canvas></div>
                 </div>
@@ -68,7 +68,7 @@
         </div>
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header"><i class="fas fa-chart-bar text-info"></i> 任务优先级分布</div>
+                <div class="card-header"><i class="fas fa-chart-bar text-info"></i> <span th:text="#{admin.dashboard.priority.distribution}">任务优先级分布</span></div>
                 <div class="card-body">
                     <div class="chart-container"><canvas id="priorityChart"></canvas></div>
                 </div>
@@ -79,13 +79,13 @@
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header"><i class="fas fa-link text-success"></i> 快捷管理</div>
+                <div class="card-header"><i class="fas fa-link text-success"></i> <span th:text="#{admin.dashboard.quick.mgmt}">快捷管理</span></div>
                 <div class="card-body">
                     <div class="row g-2">
-                        <div class="col-md-3"><a th:href="@{/admin/users}" class="btn btn-outline-primary w-100"><i class="fas fa-users"></i> 用户管理</a></div>
-                        <div class="col-md-3"><a th:href="@{/admin/projects}" class="btn btn-outline-success w-100"><i class="fas fa-folder-open"></i> 项目管理</a></div>
-                        <div class="col-md-3"><a th:href="@{/admin/tasks}" class="btn btn-outline-info w-100"><i class="fas fa-tasks"></i> 任务管理</a></div>
-                        <div class="col-md-3"><a th:href="@{/admin/logs}" class="btn btn-outline-secondary w-100"><i class="fas fa-history"></i> 审计日志</a></div>
+                        <div class="col-md-3"><a th:href="@{/admin/users}" class="btn btn-outline-primary w-100"><i class="fas fa-users"></i> <span th:text="#{admin.dashboard.user.mgmt}">用户管理</span></a></div>
+                        <div class="col-md-3"><a th:href="@{/admin/projects}" class="btn btn-outline-success w-100"><i class="fas fa-folder-open"></i> <span th:text="#{admin.dashboard.project.mgmt}">项目管理</span></a></div>
+                        <div class="col-md-3"><a th:href="@{/admin/tasks}" class="btn btn-outline-info w-100"><i class="fas fa-tasks"></i> <span th:text="#{admin.dashboard.task.mgmt}">任务管理</span></a></div>
+                        <div class="col-md-3"><a th:href="@{/admin/logs}" class="btn btn-outline-secondary w-100"><i class="fas fa-history"></i> <span th:text="#{admin.dashboard.audit.logs}">审计日志</span></a></div>
                     </div>
                 </div>
             </div>

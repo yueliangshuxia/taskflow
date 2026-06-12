@@ -8,7 +8,7 @@
     <div class="page-header rounded-3 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container-fluid">
             <h2><i class="fas" th:classappend="${user.id != null} ? 'fa-edit' : 'fa-plus'"></i>
-                <span th:text="${user.id != null} ? '编辑用户' : '创建用户'"></span></h2>
+                <span th:text="${user.id != null} ? #{admin.users.edit} : #{admin.users.create}"></span></h2>
         </div>
     </div>
 
@@ -18,38 +18,38 @@
                 <div class="card-body">
                     <form method="post" th:action="${user.id != null} ? @{/admin/users/{id}/edit(id=${user.id})} : @{/admin/users/create}">
                         <div class="mb-3">
-                            <label class="form-label">用户名</label>
+                            <label class="form-label" th:text="#{admin.users.username}">用户名</label>
                             <input type="text" name="username" class="form-control"
                                    th:value="${user.username}" th:disabled="${user.id != null}"
-                                   placeholder="用户名" required>
+                                   th:placeholder="#{admin.users.username.placeholder}" placeholder="用户名" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">显示名称</label>
+                            <label class="form-label" th:text="#{admin.users.display.name}">显示名称</label>
                             <input type="text" name="displayName" class="form-control"
-                                   th:value="${user.displayName}" placeholder="显示名称">
+                                   th:value="${user.displayName}" th:placeholder="#{admin.users.display.name.placeholder}" placeholder="显示名称">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">邮箱</label>
+                            <label class="form-label" th:text="#{admin.users.email}">邮箱</label>
                             <input type="email" name="email" class="form-control"
-                                   th:value="${user.email}" placeholder="email@example.com" required>
+                                   th:value="${user.email}" th:placeholder="#{admin.users.email.placeholder}" placeholder="email@example.com" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">密码 <span th:if="${user.id == null}" class="text-danger">*</span>
-                                <small th:if="${user.id != null}" class="text-muted">(留空则不修改)</small></label>
+                            <label class="form-label" th:text="#{admin.users.password}">密码 <span th:if="${user.id == null}" class="text-danger">*</span>
+                                <small th:if="${user.id != null}" class="text-muted" th:text="#{admin.users.password.empty}">(留空则不修改)</small></label>
                             <input type="password" name="password" class="form-control"
-                                   th:required="${user.id == null}" placeholder="密码" minlength="6">
+                                   th:required="${user.id == null}" th:placeholder="#{admin.users.password.placeholder}" placeholder="密码" minlength="6">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">角色</label>
+                            <label class="form-label" th:text="#{admin.users.role}">角色</label>
                             <select name="role" class="form-select">
-                                <option value="USER" th:selected="${user.role == null or user.role.name() == 'USER'}">普通用户</option>
-                                <option value="ADMIN" th:selected="${user.role != null and user.role.name() == 'ADMIN'}">管理员</option>
+                                <option value="USER" th:selected="${user.role == null or user.role.name() == 'USER'}" th:text="#{admin.users.role.user}">普通用户</option>
+                                <option value="ADMIN" th:selected="${user.role != null and user.role.name() == 'ADMIN'}" th:text="#{admin.users.role.admin}">管理员</option>
                             </select>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <a th:href="@{/admin/users}" class="btn btn-secondary">返回</a>
+                            <a th:href="@{/admin/users}" class="btn btn-secondary" th:text="#{admin.users.back}">返回</a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> 保存
+                                <i class="fas fa-save"></i> <span th:text="#{admin.users.save}">保存</span>
                             </button>
                         </div>
                     </form>

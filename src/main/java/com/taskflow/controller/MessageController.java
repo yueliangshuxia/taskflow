@@ -100,6 +100,7 @@ public class MessageController {
     }
 
     @GetMapping("/{id}")
+    @Transactional
     public String viewMessage(@PathVariable Long id, Model model, Authentication auth) {
         User user = getUser(auth);
         Message message = messageRepository.findWithGraphById(id)

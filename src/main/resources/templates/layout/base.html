@@ -8,7 +8,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <title th:text="${title} ?: 'TaskFlow - 任务管理系统'">TaskFlow</title>
+    <title th:text="${title} ?: #{nav.site.title}">TaskFlow</title>
 
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -28,43 +28,43 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/dashboard}">
-                            <i class="fas fa-home"></i> 首页
+                            <i class="fas fa-home"></i> <span th:text="#{nav.home}">首页</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/my-tasks}">
-                            <i class="fas fa-tasks"></i> 我的任务
+                            <i class="fas fa-tasks"></i> <span th:text="#{nav.my.tasks}">我的任务</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/projects}">
-                            <i class="fas fa-folder"></i> 项目
+                            <i class="fas fa-folder"></i> <span th:text="#{nav.projects}">项目</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/calendar}">
-                            <i class="fas fa-calendar-alt"></i> 日历
+                            <i class="fas fa-calendar-alt"></i> <span th:text="#{nav.calendar}">日历</span>
                         </a>
                     </li>
                     <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-cog"></i> 管理
+                            <i class="fas fa-cog"></i> <span th:text="#{nav.admin}">管理</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><h6 class="dropdown-header">系统管理</h6></li>
+                            <li><h6 class="dropdown-header" th:text="#{nav.admin.system}">系统管理</h6></li>
                             <li><a class="dropdown-item" th:href="@{/admin/dashboard}">
-                                <i class="fas fa-chart-bar"></i> 管理仪表盘</a></li>
+                                <i class="fas fa-chart-bar"></i> <span th:text="#{nav.admin.dashboard}">管理仪表盘</span></a></li>
                             <li><a class="dropdown-item" th:href="@{/admin/users}">
-                                <i class="fas fa-users"></i> 用户管理</a></li>
+                                <i class="fas fa-users"></i> <span th:text="#{nav.admin.users}">用户管理</span></a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">内容管理</h6></li>
+                            <li><h6 class="dropdown-header" th:text="#{nav.admin.content}">内容管理</h6></li>
                             <li><a class="dropdown-item" th:href="@{/admin/projects}">
-                                <i class="fas fa-folder-open"></i> 项目管理</a></li>
+                                <i class="fas fa-folder-open"></i> <span th:text="#{nav.admin.projects}">项目管理</span></a></li>
                             <li><a class="dropdown-item" th:href="@{/admin/tasks}">
-                                <i class="fas fa-tasks"></i> 任务管理</a></li>
+                                <i class="fas fa-tasks"></i> <span th:text="#{nav.admin.tasks}">任务管理</span></a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" th:href="@{/admin/logs}">
-                                <i class="fas fa-history"></i> 审计日志</a></li>
+                                <i class="fas fa-history"></i> <span th:text="#{nav.admin.logs}">审计日志</span></a></li>
                         </ul>
                     </li>
                 </ul>
@@ -77,13 +77,20 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" th:title="#{theme.switch}">
                             <i class="fas fa-globe"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" th:href="@{/dashboard(lang='zh')}">中文</a></li>
-                            <li><a class="dropdown-item" th:href="@{/dashboard(lang='en')}">English</a></li>
+                            <li><h6 class="dropdown-header" th:text="#{theme.title}">语言</h6></li>
+                            <li><a class="dropdown-item" href="#" onclick="switchLanguage('zh'); return false;">中文</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="switchLanguage('en'); return false;">English</a></li>
                         </ul>
+                    </li>
+                    <!-- Theme Toggle -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="themeToggle" onclick="toggleTheme(); return false;" title="切换暗色模式">
+                            <i class="fas fa-moon"></i>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/profile}">
@@ -94,7 +101,7 @@
                     <li class="nav-item">
                         <form method="post" th:action="@{/logout}" class="d-inline">
                             <button type="submit" class="nav-link border-0 bg-transparent">
-                                <i class="fas fa-sign-out-alt"></i> 退出
+                                <i class="fas fa-sign-out-alt"></i> <span th:text="#{nav.logout}">退出</span>
                             </button>
                         </form>
                     </li>
@@ -134,6 +141,15 @@
 
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/theme.js"></script>
+    <script>ThemeManager.load();</script>
+    <script>
+    function switchLanguage(lang) {
+        var url = new URL(window.location.href);
+        url.searchParams.set('lang', lang);
+        window.location.href = url.toString();
+    }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script>

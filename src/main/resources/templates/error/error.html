@@ -2,17 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>错误 - TaskFlow</title>
+    <title th:text="#{error.page.title}">错误 - TaskFlow</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="d-flex align-items-center justify-content-center" style="min-height: 100vh; background: #f8f9fa;">
     <div class="text-center">
-        <h1 class="display-4 text-muted" th:text="${errorCode} ?: '错误'"></h1>
-        <h3 class="mb-3"><i class="fas fa-exclamation-circle text-warning"></i> 出错了</h3>
-        <p class="text-muted mb-4" th:text="${errorMessage} ?: '操作无法完成'"></p>
+        <h1 class="display-4 text-muted" th:text="${errorCode} ?: #{error.generic}"></h1>
+        <h3 class="mb-3"><i class="fas fa-exclamation-circle text-warning"></i> <span th:text="#{error.title}">出错了</span></h3>
+        <p class="text-muted mb-4" th:text="${errorMessage} ?: #{error.message}"></p>
         <a th:href="@{/dashboard}" class="btn btn-primary">
-            <i class="fas fa-home"></i> 返回首页
+            <i class="fas fa-home"></i> <span th:text="#{error.back.home}">返回首页</span>
         </a>
     </div>
 </body>

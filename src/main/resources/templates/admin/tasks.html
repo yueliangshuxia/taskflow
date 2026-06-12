@@ -7,8 +7,8 @@
 <div th:fragment="content">
     <div class="page-header-custom">
         <div>
-            <h2><i class="fas fa-tasks"></i> 任务管理</h2>
-            <p>查看和管理系统中所有任务</p>
+            <h2><i class="fas fa-tasks"></i> <span th:text="#{admin.tasks.title}">任务管理</span></h2>
+            <p th:text="#{admin.tasks.subtitle}">查看和管理系统中所有任务</p>
         </div>
     </div>
 
@@ -17,13 +17,13 @@
             <form method="get" th:action="@{/admin/tasks}" class="row g-2 align-items-center">
                 <div class="col-auto">
                     <select name="status" class="form-select form-select-sm">
-                        <option value="">全部状态</option>
+                        <option value="" th:text="#{project.filter.all.status}">全部状态</option>
                         <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.displayName}"
                                 th:selected="${s.name() == selectedStatus}"></option>
                     </select>
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> 筛选</button>
+                    <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> <span th:text="#{common.filter}">筛选</span></button>
                 </div>
             </form>
         </div>
@@ -35,15 +35,15 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>标题</th>
-                            <th>状态</th>
-                            <th>优先级</th>
-                            <th>项目</th>
-                            <th>指派人</th>
-                            <th>创建者</th>
-                            <th>创建时间</th>
-                            <th class="text-end">操作</th>
+                            <th th:text="#{admin.users.id}">ID</th>
+                            <th th:text="#{task.title}">标题</th>
+                            <th th:text="#{task.status}">状态</th>
+                            <th th:text="#{task.priority}">优先级</th>
+                            <th th:text="#{project.singular}">项目</th>
+                            <th th:text="#{task.assignee}">指派人</th>
+                            <th th:text="#{task.creator}">创建者</th>
+                            <th th:text="#{admin.users.created.at}">创建时间</th>
+                            <th class="text-end" th:text="#{admin.users.actions}">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,18 +53,18 @@
                             <td><span th:class="'badge badge-' + ${task.status.name().toLowerCase().replace('_', '-')}" th:text="${task.status.displayName}">状态</span></td>
                             <td><span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}" th:text="${task.priority.displayName}">优先级</span></td>
                             <td th:text="${task.project != null ? task.project.name : '-'}" class="text-muted">项目</td>
-                            <td th:text="${task.assignee != null ? task.assignee.displayName : '未指派'}" class="text-muted">指派人</td>
+                            <td th:text="${task.assignee != null ? task.assignee.displayName : task.no.assignee}" class="text-muted">指派人</td>
                             <td th:text="${task.creator.displayName}">创建者</td>
                             <td class="small text-muted" th:text="${#temporals.format(task.createdAt, 'MM-dd HH:mm')}">时间</td>
                             <td class="text-end">
                                 <form method="post" th:action="@{/admin/tasks/{id}/delete(id=${task.id})}"
-                                      onsubmit="return confirm('确定要删除此任务吗？')" class="d-inline">
+                                      th:onsubmit="'return confirm(\'' + #{task.delete.confirm} + '\')'" class="d-inline">
                                     <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i></button>
                                 </form>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(tasks)}">
-                            <td colspan="9" class="text-center text-muted py-4"><i class="fas fa-inbox me-2"></i>暂无任务</td>
+                            <td colspan="9" class="text-center text-muted py-4"><i class="fas fa-inbox me-2"></i><span th:text="#{admin.tasks.no.data}">暂无任务</span></td>
                         </tr>
                     </tbody>
                 </table>

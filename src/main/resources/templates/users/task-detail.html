@@ -5,19 +5,24 @@
 </head>
 <body>
 <div th:fragment="content">
-    <div class="page-header rounded-3 mb-4">
+    <div class="page-header rounded-3 mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <div>
-                <h2><i class="fas fa-tasks"></i> <span th:text="${task.title}">任务标题</span></h2>
-                <p class="mb-0 text-white-50">
-                    <a th:href="@{/projects/{id}(id=${task.projectId})}" class="text-white">
-                        <i class="fas fa-folder-open"></i> <span th:text="${task.projectName}">所属项目</span>
-                    </a>
-                </p>
+            <div class="d-flex align-items-center gap-3">
+                <a href="javascript:history.back()" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left"></i> <span th:text="#{common.back}">返回</span>
+                </a>
+                <div>
+                    <h2 class="mb-0 text-white"><i class="fas fa-tasks"></i> <span th:text="${task.title}">任务标题</span></h2>
+                    <p class="mb-0 text-white-50">
+                        <a th:href="@{/projects/{id}(id=${task.projectId})}" class="text-white">
+                            <i class="fas fa-folder-open"></i> <span th:text="${task.projectName}">所属项目</span>
+                        </a>
+                    </p>
+                </div>
             </div>
             <div>
                 <a th:href="@{/tasks/{id}/edit(id=${task.id})}" class="btn btn-light btn-sm">
-                    <i class="fas fa-edit"></i> 编辑
+                    <i class="fas fa-edit"></i> <span th:text="#{task.edit}">编辑</span>
                 </a>
             </div>
         </div>
@@ -25,7 +30,6 @@
 
     <div class="row">
         <div class="col-md-8">
-            <!-- Task Info -->
             <div class="card mb-3">
                 <div class="card-body">
                     <div class="d-flex gap-2 mb-3">
@@ -34,17 +38,15 @@
                         <span th:class="'badge rounded-pill badge-' + ${task.priority.name().toLowerCase() + ' fs-6'}"
                               th:text="${task.priority.displayName}">优先级</span>
                         <span th:if="${task.dueDate}" class="badge bg-info fs-6">
-                            <i class="fas fa-calendar"></i> 截止: <span th:text="${task.dueDate}">日期</span>
+                            <i class="fas fa-calendar"></i> <span th:text="#{task.due}">截止</span>: <span th:text="${task.dueDate}">日期</span>
                         </span>
                     </div>
 
-                    <!-- Description -->
-                    <h6 class="fw-bold">描述</h6>
-                    <p th:text="${task.description} ?: '暂无描述'" class="text-muted"></p>
+                    <h6 class="fw-bold" th:text="#{task.description}">描述</h6>
+                    <p th:text="${task.description} ?: #{task.no.description}" class="text-muted"></p>
 
-                    <!-- Status Update (AJAX) -->
                     <div class="mt-3 p-3 bg-light rounded">
-                        <label class="fw-bold mb-2"><i class="fas fa-sync"></i> 更新状态:</label>
+                        <label class="fw-bold mb-2"><i class="fas fa-sync"></i> <span th:text="#{task.status.update}">更新状态</span>:</label>
                         <select class="form-select form-select-sm w-auto status-select"
                                 th:attr="data-task-id=${task.id}"
                                 onchange="updateTaskStatus(this)">
@@ -57,24 +59,23 @@
                 </div>
             </div>
 
-            <!-- Comments Section -->
             <div class="card mb-3">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-comments"></i> 评论 (<span th:text="${#lists.size(comments)}">0</span>)</h5>
+                    <h5 class="mb-0"><i class="fas fa-comments"></i> <span th:text="#{task.comments}">评论</span> (<span th:text="${#lists.size(comments)}">0</span>)</h5>
                 </div>
                 <div class="card-body">
                     <form method="post" th:action="@{/tasks/{id}/comments(id=${task.id})}" class="mb-4">
                         <div class="mb-2">
                             <textarea name="content" class="form-control" rows="3"
-                                      placeholder="输入评论..." required></textarea>
+                                      th:placeholder="#{task.comment.placeholder}" placeholder="输入评论..." required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fas fa-paper-plane"></i> 发表评论
+                            <i class="fas fa-paper-plane"></i> <span th:text="#{task.comment.submit}">发表评论</span>
                         </button>
                     </form>
 
                     <th:block th:if="${#lists.isEmpty(comments)}">
-                        <p class="text-muted text-center">暂无评论</p>
+                        <p class="text-muted text-center" th:text="#{task.no.comments}">暂无评论</p>
                     </th:block>
                     <div th:unless="${#lists.isEmpty(comments)}">
                         <div th:each="comment : ${comments}" class="comment-item">
@@ -90,43 +91,40 @@
         </div>
 
         <div class="col-md-4">
-            <!-- Assignee Info -->
             <div class="card mb-3">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-user"></i> 指派信息</h5>
+                    <h5 class="mb-0"><i class="fas fa-user"></i> <span th:text="#{task.assignee.info}">指派信息</span></h5>
                 </div>
                 <div class="card-body">
-                    <p class="mb-1"><strong>创建者：</strong><span th:text="${task.creatorName}">创建者</span></p>
-                    <p class="mb-1"><strong>指派人：</strong>
-                        <span th:text="${task.assigneeName} ?: '未指派'" th:class="${task.assigneeName} ? '' : 'text-muted'"></span>
+                    <p class="mb-1"><strong th:text="#{task.creator}">创建者：</strong><span th:text="${task.creatorName}">创建者</span></p>
+                    <p class="mb-1"><strong th:text="#{task.assignee}">指派人：</strong>
+                        <span th:text="${task.assigneeName} ?: #{task.no.assignee}" th:class="${task.assigneeName} ? '' : 'text-muted'"></span>
                     </p>
                 </div>
             </div>
 
-            <!-- Actions -->
             <div class="card mb-3">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-cog"></i> 操作</h5>
+                    <h5 class="mb-0"><i class="fas fa-cog"></i> <span th:text="#{task.actions}">操作</span></h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <a th:href="@{/tasks/{id}/edit(id=${task.id})}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-edit"></i> 编辑任务
+                            <i class="fas fa-edit"></i> <span th:text="#{task.edit}">编辑任务</span>
                         </a>
                         <form method="post" th:action="@{/tasks/{id}/delete(id=${task.id})}"
-                              onsubmit="return confirm('确定要删除此任务吗？')">
+                              th:onsubmit="'return confirm(\'' + #{task.delete.confirm} + '\')'">
                             <button type="submit" class="btn btn-outline-danger btn-sm w-100">
-                                <i class="fas fa-trash"></i> 删除任务
+                                <i class="fas fa-trash"></i> <span th:text="#{task.delete}">删除任务</span>
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- File Attachment -->
             <div class="card mb-3">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-paperclip"></i> 附件</h5>
+                    <h5 class="mb-0"><i class="fas fa-paperclip"></i> <span th:text="#{task.attachments}">附件</span></h5>
                 </div>
                 <div class="card-body">
                     <form method="post" th:action="@{/tasks/{id}/attachments(id=${task.id})}"
@@ -135,7 +133,7 @@
                             <input type="file" name="file" class="form-control form-control-sm">
                         </div>
                         <button type="submit" class="btn btn-outline-primary btn-sm w-100">
-                            <i class="fas fa-upload"></i> 上传文件
+                            <i class="fas fa-upload"></i> <span th:text="#{task.upload.file}">上传文件</span>
                         </button>
                     </form>
                     <th:block th:if="${attachments != null and !#lists.isEmpty(attachments)}">

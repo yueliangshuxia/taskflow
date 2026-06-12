@@ -7,20 +7,20 @@
 <div th:fragment="content">
     <div class="page-header-custom">
         <div class="d-flex justify-content-between align-items-center">
-            <h2><i class="fas fa-folder"></i> 我的项目</h2>
+            <h2><i class="fas fa-folder"></i> <span th:text="#{project.list}">我的项目</span></h2>
             <a th:href="@{/projects/create}" class="btn btn-light">
-                <i class="fas fa-plus"></i> 创建项目
+                <i class="fas fa-plus"></i> <span th:text="#{project.create}">创建项目</span>
             </a>
         </div>
     </div>
 
     <th:block th:if="${#lists.isEmpty(projects)}">
         <div class="empty-state">
-            <img src="/images/empty-projects.svg" alt="暂无项目" style="width: 200px; height: 160px;">
-            <h4 class="mt-3">还没有项目</h4>
-            <p>创建一个新项目来开始管理你的任务</p>
+            <img src="/images/empty-projects.svg" alt="No projects" style="width: 200px; height: 160px;">
+            <h4 class="mt-3" th:text="#{project.no.projects}">还没有项目</h4>
+            <p th:text="#{project.no.projects.desc}">创建一个新项目来开始管理你的任务</p>
             <a th:href="@{/projects/create}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> 创建项目
+                <i class="fas fa-plus"></i> <span th:text="#{project.create}">创建项目</span>
             </a>
         </div>
     </th:block>
@@ -41,13 +41,13 @@
                                 </h5>
                             </div>
                         </div>
-                        <p class="card-text text-muted small mb-3" th:text="${project.description} ?: '暂无描述'">
+                        <p class="card-text text-muted small mb-3" th:text="${project.description} ?: #{project.no.desc}">
                         </p>
                     </div>
                     <div class="card-footer bg-transparent border-top-0">
                         <div class="d-flex justify-content-between text-muted small">
-                            <span><i class="fas fa-tasks"></i> <span th:text="${project.taskCount}">0</span> 任务</span>
-                            <span><i class="fas fa-users"></i> <span th:text="${project.memberCount}">0</span> 成员</span>
+                            <span><i class="fas fa-tasks"></i> <span th:text="${project.taskCount}">0</span> <span th:text="#{project.tasks}">任务</span></span>
+                            <span><i class="fas fa-users"></i> <span th:text="${project.memberCount}">0</span> <span th:text="#{project.members}">成员</span></span>
                             <span><i class="fas fa-user"></i> <span th:text="${project.ownerName}">owner</span></span>
                         </div>
                     </div>

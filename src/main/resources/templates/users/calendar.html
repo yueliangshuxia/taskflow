@@ -16,8 +16,8 @@
 <body>
 <div th:fragment="content">
     <div class="page-header-custom">
-        <h2><i class="fas fa-calendar-alt"></i> 日历视图</h2>
-        <p class="text-muted">按截止日期查看所有任务</p>
+        <h2><i class="fas fa-calendar-alt"></i> <span th:text="#{calendar.title}">日历视图</span></h2>
+        <p class="text-muted" th:text="#{calendar.subtitle}">按截止日期查看所有任务</p>
     </div>
 
     <div class="card">
@@ -26,7 +26,6 @@
         </div>
     </div>
 
-    <!-- Event detail modal -->
     <div class="modal fade" id="eventModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
@@ -35,14 +34,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>状态：</strong><span id="eventStatus"></span></p>
-                    <p><strong>优先级：</strong><span id="eventPriority"></span></p>
-                    <p><strong>项目：</strong><span id="eventProject"></span></p>
-                    <p><strong>负责人：</strong><span id="eventAssignee"></span></p>
+                    <p><strong th:text="#{calendar.event.status}">状态：</strong><span id="eventStatus"></span></p>
+                    <p><strong th:text="#{calendar.event.priority}">优先级：</strong><span id="eventPriority"></span></p>
+                    <p><strong th:text="#{calendar.event.project}">项目：</strong><span id="eventProject"></span></p>
+                    <p><strong th:text="#{calendar.event.assignee}">负责人：</strong><span id="eventAssignee"></span></p>
                 </div>
                 <div class="modal-footer">
-                    <a href="#" id="eventLink" class="btn btn-primary btn-sm">查看详情</a>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">关闭</button>
+                    <a href="#" id="eventLink" class="btn btn-primary btn-sm" th:text="#{calendar.view.detail}">查看详情</a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" th:text="#{calendar.close}">关闭</button>
                 </div>
             </div>
         </div>
@@ -54,7 +53,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
-        locale: 'zh-cn',
+        locale: /*[[#{calendar.locale}]]*/ 'zh-cn',
         firstDay: 1,
         height: 'auto',
         headerToolbar: {
@@ -63,9 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 'dayGridMonth,listMonth'
         },
         buttonText: {
-            today: '今天',
-            month: '月视图',
-            listMonth: '列表'
+            today: /*[[#{calendar.today}]]*/ '今天',
+            month: /*[[#{calendar.month}]]*/ '月视图',
+            listMonth: /*[[#{calendar.list}]]*/ '列表'
         },
         events: '/api/calendar/events',
         eventClick: function(info) {
@@ -80,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var modal = new bootstrap.Modal(document.getElementById('eventModal'));
             modal.show();
         },
-        noEventsText: '暂无到期任务',
+        noEventsText: /*[[#{calendar.no.events}]]*/ '暂无到期任务',
         loading: function(isLoading) {
             if (isLoading) {
                 calendarEl.style.opacity = '0.5';

@@ -2,17 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>404 - 页面未找到</title>
+    <title th:text="#{error.404.title}">404 - 页面未找到</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="d-flex align-items-center justify-content-center" style="min-height: 100vh; background: #f8f9fa;">
     <div class="text-center">
         <h1 class="display-1 text-muted">404</h1>
-        <h3 class="mb-3"><i class="fas fa-compass text-warning"></i> 页面未找到</h3>
-        <p class="text-muted mb-4" th:text="${errorMessage} ?: '您访问的页面不存在'"></p>
+        <h3 class="mb-3"><i class="fas fa-compass text-warning"></i> <span th:text="#{error.404}">页面未找到</span></h3>
+        <p class="text-muted mb-4" th:text="${errorMessage} ?: #{error.404.message}"></p>
         <a th:href="@{/dashboard}" class="btn btn-primary">
-            <i class="fas fa-home"></i> 返回首页
+            <i class="fas fa-home"></i> <span th:text="#{error.back.home}">返回首页</span>
         </a>
     </div>
 </body>

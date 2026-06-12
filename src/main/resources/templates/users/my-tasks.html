@@ -8,25 +8,24 @@
     <div class="page-header-custom">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h2><i class="fas fa-tasks"></i> 我的任务</h2>
-                <p>欢迎回来，<span sec:authentication="name"></span>！以下是你在所有项目中的任务</p>
+                <h2><i class="fas fa-tasks"></i> <span th:text="#{mytasks.title}">我的任务</span></h2>
+                <p><span th:text="#{mytasks.welcome}">以下是你在所有项目中的任务</span></p>
             </div>
         </div>
     </div>
 
     <div class="row g-4">
-        <!-- 待办 TODO -->
         <div class="col-md-6 col-xl-3">
             <div class="card h-100 fade-in">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                    <span><i class="fas fa-clock text-secondary"></i> 待办</span>
+                    <span><i class="fas fa-clock text-secondary"></i> <span th:text="#{mytasks.todo}">待办</span></span>
                     <span class="badge badge-todo" th:text="${todoPage.totalElements}">0</span>
                 </div>
                 <div class="card-body p-0">
                     <th:block th:if="${todoPage.totalElements == 0}">
                         <div class="empty-state py-4">
                             <i class="fas fa-inbox"></i>
-                            <h4>暂无待办任务</h4>
+                            <h4 th:text="#{mytasks.no.todo}">暂无待办任务</h4>
                         </div>
                     </th:block>
                     <div th:unless="${todoPage.totalElements == 0}" class="list-group list-group-flush">
@@ -42,11 +41,11 @@
                             <div class="d-flex justify-content-between align-items-center mt-1">
                                 <small class="text-muted">
                                     <i class="fas fa-folder-open"></i>
-                                    <span th:text="${task.projectName} ?: '无项目'">项目</span>
+                                    <span th:text="${task.projectName} ?: #{mytasks.no.project}">项目</span>
                                 </small>
                                 <small class="text-muted" th:if="${task.dueDate}">
                                     <i class="fas fa-calendar-alt"></i>
-                                    <span th:text="${task.dueDate}">截止日</span>
+                                    <span th:text="#{mytasks.due}">截止日</span> <span th:text="${task.dueDate}">日期</span>
                                 </small>
                             </div>
                         </a>
@@ -78,18 +77,17 @@
             </div>
         </div>
 
-        <!-- 进行中 IN_PROGRESS -->
         <div class="col-md-6 col-xl-3">
             <div class="card h-100 fade-in" style="animation-delay: 0.1s">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                    <span><i class="fas fa-spinner text-primary"></i> 进行中</span>
+                    <span><i class="fas fa-spinner text-primary"></i> <span th:text="#{mytasks.in.progress}">进行中</span></span>
                     <span class="badge badge-in-progress" th:text="${inProgressPage.totalElements}">0</span>
                 </div>
                 <div class="card-body p-0">
                     <th:block th:if="${inProgressPage.totalElements == 0}">
                         <div class="empty-state py-4">
                             <i class="fas fa-play-circle"></i>
-                            <h4>暂无进行中的任务</h4>
+                            <h4 th:text="#{mytasks.no.progress}">暂无进行中的任务</h4>
                         </div>
                     </th:block>
                     <div th:unless="${inProgressPage.totalElements == 0}" class="list-group list-group-flush">
@@ -105,11 +103,11 @@
                             <div class="d-flex justify-content-between align-items-center mt-1">
                                 <small class="text-muted">
                                     <i class="fas fa-folder-open"></i>
-                                    <span th:text="${task.projectName} ?: '无项目'">项目</span>
+                                    <span th:text="${task.projectName} ?: #{mytasks.no.project}">项目</span>
                                 </small>
                                 <small class="text-muted" th:if="${task.dueDate}">
                                     <i class="fas fa-calendar-alt"></i>
-                                    <span th:text="${task.dueDate}">截止日</span>
+                                    <span th:text="#{mytasks.due}">截止日</span> <span th:text="${task.dueDate}">日期</span>
                                 </small>
                             </div>
                         </a>
@@ -141,18 +139,17 @@
             </div>
         </div>
 
-        <!-- 审核中 IN_REVIEW -->
         <div class="col-md-6 col-xl-3">
             <div class="card h-100 fade-in" style="animation-delay: 0.2s">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                    <span><i class="fas fa-search text-warning"></i> 审核中</span>
+                    <span><i class="fas fa-search text-warning"></i> <span th:text="#{mytasks.in.review}">审核中</span></span>
                     <span class="badge badge-in-review" th:text="${inReviewPage.totalElements}">0</span>
                 </div>
                 <div class="card-body p-0">
                     <th:block th:if="${inReviewPage.totalElements == 0}">
                         <div class="empty-state py-4">
                             <i class="fas fa-clipboard-check"></i>
-                            <h4>暂无审核中的任务</h4>
+                            <h4 th:text="#{mytasks.no.review}">暂无审核中的任务</h4>
                         </div>
                     </th:block>
                     <div th:unless="${inReviewPage.totalElements == 0}" class="list-group list-group-flush">
@@ -168,11 +165,11 @@
                             <div class="d-flex justify-content-between align-items-center mt-1">
                                 <small class="text-muted">
                                     <i class="fas fa-folder-open"></i>
-                                    <span th:text="${task.projectName} ?: '无项目'">项目</span>
+                                    <span th:text="${task.projectName} ?: #{mytasks.no.project}">项目</span>
                                 </small>
                                 <small class="text-muted" th:if="${task.dueDate}">
                                     <i class="fas fa-calendar-alt"></i>
-                                    <span th:text="${task.dueDate}">截止日</span>
+                                    <span th:text="#{mytasks.due}">截止日</span> <span th:text="${task.dueDate}">日期</span>
                                 </small>
                             </div>
                         </a>
@@ -204,18 +201,17 @@
             </div>
         </div>
 
-        <!-- 已完成 DONE -->
         <div class="col-md-6 col-xl-3">
             <div class="card h-100 fade-in" style="animation-delay: 0.3s">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                    <span><i class="fas fa-check-circle text-success"></i> 已完成</span>
+                    <span><i class="fas fa-check-circle text-success"></i> <span th:text="#{mytasks.done}">已完成</span></span>
                     <span class="badge badge-done" th:text="${donePage.totalElements}">0</span>
                 </div>
                 <div class="card-body p-0">
                     <th:block th:if="${donePage.totalElements == 0}">
                         <div class="empty-state py-4">
                             <i class="fas fa-check-double"></i>
-                            <h4>暂无已完成的任务</h4>
+                            <h4 th:text="#{mytasks.no.done}">暂无已完成的任务</h4>
                         </div>
                     </th:block>
                     <div th:unless="${donePage.totalElements == 0}" class="list-group list-group-flush">
@@ -231,11 +227,11 @@
                             <div class="d-flex justify-content-between align-items-center mt-1">
                                 <small class="text-muted">
                                     <i class="fas fa-folder-open"></i>
-                                    <span th:text="${task.projectName} ?: '无项目'">项目</span>
+                                    <span th:text="${task.projectName} ?: #{mytasks.no.project}">项目</span>
                                 </small>
                                 <small class="text-muted" th:if="${task.dueDate}">
                                     <i class="fas fa-calendar-alt"></i>
-                                    <span th:text="${task.dueDate}">截止日</span>
+                                    <span th:text="#{mytasks.due}">截止日</span> <span th:text="${task.dueDate}">日期</span>
                                 </small>
                             </div>
                         </a>

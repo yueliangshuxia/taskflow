@@ -8,11 +8,11 @@
     <div class="page-header-custom">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h2><i class="fas fa-envelope"></i> 站内信</h2>
+                <h2><i class="fas fa-envelope"></i> <span th:text="#{message.title}">站内信</span></h2>
             </div>
             <div>
                 <a th:href="@{/messages/compose}" class="btn btn-success btn-sm">
-                    <i class="fas fa-pen"></i> 写消息
+                    <i class="fas fa-pen"></i> <span th:text="#{message.compose}">写消息</span>
                 </a>
             </div>
         </div>
@@ -23,13 +23,13 @@
             <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${activeTab == 'inbox'} ? 'active'" th:href="@{/messages}">
-                        <i class="fas fa-inbox"></i> 收件箱
+                        <i class="fas fa-inbox"></i> <span th:text="#{message.inbox}">收件箱</span>
                         <span class="badge bg-danger ms-1" th:if="${unreadCount > 0}" th:text="${unreadCount}"></span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${activeTab == 'sent'} ? 'active'" th:href="@{/messages/sent}">
-                        <i class="fas fa-paper-plane"></i> 已发送
+                        <i class="fas fa-paper-plane"></i> <span th:text="#{message.sent}">已发送</span>
                     </a>
                 </li>
             </ul>
@@ -38,7 +38,7 @@
             <th:block th:if="${#lists.isEmpty(messages)}">
                 <div class="empty-state m-4">
                     <i class="fas fa-envelope-open-text"></i>
-                    <p class="text-muted">暂无消息</p>
+                    <p class="text-muted" th:text="#{message.no.messages}">暂无消息</p>
                 </div>
             </th:block>
             <div th:unless="${#lists.isEmpty(messages)}" class="list-group list-group-flush">
@@ -69,14 +69,14 @@
     <nav th:if="${totalPages > 1}" class="mt-3">
         <ul class="pagination justify-content-center pagination-sm">
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:href="@{/messages(page=${currentPage - 1})}">上一页</a>
+                <a class="page-link" th:href="@{/messages(page=${currentPage - 1})}" th:text="#{pagination.previous}">上一页</a>
             </li>
             <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                 th:classappend="${i == currentPage} ? 'active'">
                 <a class="page-link" th:href="@{/messages(page=${i})}" th:text="${i + 1}">1</a>
             </li>
             <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/messages(page=${currentPage + 1})}">下一页</a>
+                <a class="page-link" th:href="@{/messages(page=${currentPage + 1})}" th:text="#{pagination.next}">下一页</a>
             </li>
         </ul>
     </nav>

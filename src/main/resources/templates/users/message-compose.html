@@ -6,31 +6,31 @@
 <body>
 <div th:fragment="content">
     <div class="page-header-custom">
-        <h2><i class="fas fa-pen"></i> 写消息</h2>
+        <h2><i class="fas fa-pen"></i> <span th:text="#{message.compose}">写消息</span></h2>
     </div>
 
     <div class="card">
         <div class="card-body">
             <form method="post" th:action="@{/messages/compose}">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">收件人</label>
+                    <label class="form-label fw-semibold" th:text="#{message.recipient}">收件人</label>
                     <select name="recipientId" class="form-select" required>
-                        <option value="">请选择收件人...</option>
+                        <option value="" th:text="#{message.select.recipient}">请选择收件人...</option>
                         <option th:each="u : ${users}" th:value="${u.id}"
                                 th:text="${u.displayName + ' (' + u.username + ')'}"></option>
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">主题</label>
+                    <label class="form-label fw-semibold" th:text="#{message.subject}">主题</label>
                     <input type="text" name="subject" class="form-control" maxlength="200" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">内容</label>
+                    <label class="form-label fw-semibold" th:text="#{message.content.label}">内容</label>
                     <textarea name="content" class="form-control" rows="8" required></textarea>
                 </div>
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> 发送</button>
-                    <a th:href="@{/messages}" class="btn btn-secondary">取消</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> <span th:text="#{message.send}">发送</span></button>
+                    <a th:href="@{/messages}" class="btn btn-secondary" th:text="#{common.cancel}">取消</a>
                 </div>
             </form>
         </div>
