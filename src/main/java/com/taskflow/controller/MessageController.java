@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/messages")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MessageController {
 
     private final MessageRepository messageRepository;
@@ -72,6 +74,7 @@ public class MessageController {
     }
 
     @PostMapping("/compose")
+    @Transactional
     public String sendMessage(@RequestParam Long recipientId,
                               @RequestParam String subject,
                               @RequestParam String content,
@@ -99,7 +102,7 @@ public class MessageController {
     @GetMapping("/{id}")
     public String viewMessage(@PathVariable Long id, Model model, Authentication auth) {
         User user = getUser(auth);
-        Message message = messageRepository.findById(id)
+        Message message = messageRepository.findWithGraphById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("消息不存在"));
 
         // Mark as read if recipient
