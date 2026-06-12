@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 
 **Prerequisites:** JDK 17+, MySQL 8.0+
-**Database:** Create a `taskflow` database first, or run `src/main/resources/schema.sql`
+**Database:** Create a `taskflow` database first, then run `src/main/resources/schema.sql` on it (this creates ALL tables including `persistent_logins` which JPA won't auto-create).
 **Access:** http://localhost:8080
 **Default accounts:** `admin / admin123` (ADMIN), `demo / demo123` (USER)
 **Maven Wrapper:** Use `./mvnw` (no system Maven install required). The wrapper jar is at `.mvn/wrapper/maven-wrapper.jar`.
@@ -110,8 +110,9 @@ All user-facing pages use the **fragment layout pattern**: controllers set `mode
 
 - **Auth:** Spring Security with form login, BCrypt, role-based (`ROLE_ADMIN`/`ROLE_USER`). Remember-Me via `persistent_logins` table.
 - **DB schema:** Hibernate `ddl-auto: update` in dev. 9 tables: users, projects, project_members, tasks, comments, task_attachments, visit_logs, audit_logs, persistent_logins.
+- **⚠️ `persistent_logins`:** This table is used by Spring Security's `JdbcTokenRepositoryImpl` directly via `JdbcTemplate`, NOT through JPA. Hibernate's `ddl-auto` will NOT create it. It must be created by running `schema.sql` or executing the `CREATE TABLE` manually. If missing, Remember-Me and logout will fail with a SQL exception (`Table 'taskflow.persistent_logins' doesn't exist`).
 - **Entities:** Lombok (`@Data`, `@Builder`, `@NoArgs`/`@AllArgs`). Manual `@PrePersist`/`@PreUpdate` for timestamps (not JPA Auditing).
-- **open-in-view: false** — lazy loading throws outside `@Transactional`. Fetch data eagerly or within service transactions.
+- **open-in-view: false** — lazy loading throws `LazyInitializationException` outside `@Transactional`. Every controller→service→repository path must either `JOIN FETCH` or wrap in `@Transactional`. Controllers are NOT transactional by default; add `@Transactional(readOnly = true)` at the service impl method.
 - **Service layer:** Interface + Impl. `@Transactional` at impl methods. Custom exceptions: `ResourceNotFoundException`, `UnauthorizedException`, `BadRequestException`, `FileStorageException`.
 - **AJAX:** `TaskRestController` handles inline status updates via POST `/api/tasks/{id}/status`. CSRF token passed via meta tags (`_csrf.token`, `_csrf.headerName`), helpers in `main.js` (`getCsrfToken()`, `getCsrfHeader()`).
 - **Native queries:** `AdminProjectController.resetProjectId()` uses `EntityManager.createNativeQuery("ALTER TABLE projects AUTO_INCREMENT = 1")` directly. Available pattern for DDL or vendor-specific SQL when JPQL can't express it.
@@ -153,6 +154,7 @@ All `@ManyToOne` / `@OneToMany` use `FetchType.LAZY`. N+1 mitigated by `@EntityG
 
 - **SpEL can't compare enums:** `th:if="${s == task.status}"` fails. Use `s.name() == task.status.name()` instead.
 - **`th:class` replaces all classes:** Use `class="..."` + `th:classappend="..."` to preserve base classes.
+- **`th:classappend` ternary syntax:** Use `${condition ? 'value' : ''}` (inline ternary inside `${}`). Do NOT use `${condition} ? 'value'` (mixed `${}` + separate ternary) — attoparser cannot parse it and throws `ParseException`.
 - **Template changes** must be copied to `target/classes/templates/` (or run `mvn compile`). DevTools restart doesn't pick up template-only changes.
 
 ### Application Config (application.yml)
