@@ -2,6 +2,7 @@ package com.taskflow.dto;
 
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class TaskCreateDto {
@@ -11,4 +12,5 @@ public class TaskCreateDto {
     private String priority;
     private Long assigneeId;
     private LocalDate dueDate;
+    private List<Long> tagIds;
 }

@@ -15,6 +15,8 @@ public interface ProjectService {
     ProjectDto createProject(String name, String description, String username);
     ProjectDto updateProject(Long projectId, String name, String description, String username);
     void deleteProject(Long projectId, String username);
+    void restoreProject(Long projectId);
+    List<ProjectDto> findDeletedProjects();
     void addMember(Long projectId, Long userId, String username);
     void removeMember(Long projectId, Long userId, String username);
     List<User> getProjectMembers(Long projectId);

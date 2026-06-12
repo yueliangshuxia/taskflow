@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header-custom">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-envelope"></i> 站内信</h2>
+            </div>
+            <div>
+                <a th:href="@{/messages/compose}" class="btn btn-success btn-sm">
+                    <i class="fas fa-pen"></i> 写消息
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'inbox'} ? 'active'" th:href="@{/messages}">
+                        <i class="fas fa-inbox"></i> 收件箱
+                        <span class="badge bg-danger ms-1" th:if="${unreadCount > 0}" th:text="${unreadCount}"></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'sent'} ? 'active'" th:href="@{/messages/sent}">
+                        <i class="fas fa-paper-plane"></i> 已发送
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body p-0">
+            <th:block th:if="${#lists.isEmpty(messages)}">
+                <div class="empty-state m-4">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <p class="text-muted">暂无消息</p>
+                </div>
+            </th:block>
+            <div th:unless="${#lists.isEmpty(messages)}" class="list-group list-group-flush">
+                <a th:each="msg : ${messages}"
+                   th:href="@{/messages/{id}(id=${msg.id})}"
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                   th:classappend="${!msg.isRead and activeTab == 'inbox'} ? 'fw-bold bg-light'">
+                    <div>
+                        <div>
+                            <span th:if="${!msg.isRead and activeTab == 'inbox'}" class="text-primary me-1">●</span>
+                            <span th:text="${msg.subject}">主题</span>
+                        </div>
+                        <small class="text-muted">
+                            <th:block th:if="${activeTab == 'inbox'}">
+                                <i class="fas fa-user"></i> <span th:text="${msg.sender.displayName}">发件人</span>
+                            </th:block>
+                            <th:block th:if="${activeTab == 'sent'}">
+                                <i class="fas fa-user"></i> <span th:text="${msg.recipient.displayName}">收件人</span>
+                            </th:block>
+                        </small>
+                    </div>
+                    <small class="text-muted flex-shrink-0 ms-2" th:text="${msg.createdAt}">时间</small>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <nav th:if="${totalPages > 1}" class="mt-3">
+        <ul class="pagination justify-content-center pagination-sm">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/messages(page=${currentPage - 1})}">上一页</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{/messages(page=${i})}" th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/messages(page=${currentPage + 1})}">下一页</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

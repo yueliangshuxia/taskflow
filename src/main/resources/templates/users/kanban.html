@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header-custom">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-columns"></i> <span th:text="${project.name}">项目名</span> - 看板</h2>
+                <p class="mb-0">拖拽任务卡片以更新状态</p>
+            </div>
+            <div>
+                <a th:href="@{/projects/{id}(id=${project.id})}" class="btn btn-light btn-sm me-1">
+                    <i class="fas fa-list"></i> 任务列表
+                </a>
+                <a th:href="@{/projects/{id}/tasks/create(id=${project.id})}" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus"></i> 新建任务
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3" id="kanban-board">
+        <!-- TODO Column -->
+        <div class="col-md-4">
+            <div class="kanban-column" data-status="TODO">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold">
+                        <span class="badge badge-todo me-2">待办</span>
+                        <span class="badge bg-secondary rounded-pill" th:text="${#lists.size(todoTasks)}">0</span>
+                    </h5>
+                </div>
+                <div class="sortable-list" data-status="TODO">
+                    <th:block th:if="${#lists.isEmpty(todoTasks)}">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p class="mb-0 small">暂无待办任务</p>
+                        </div>
+                    </th:block>
+                    <div th:each="task : ${todoTasks}"
+                         class="card kanban-card mb-2"
+                         th:classappend="'priority-' + ${task.priority.name()}"
+                         data-task-id="${task.id}"
+                         th:attr="data-task-id=${task.id}">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <a th:href="@{/tasks/{id}(id=${task.id})}"
+                                   class="text-decoration-none fw-bold text-dark stretched-link"
+                                   th:text="${task.title}">任务标题</a>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}"
+                                      th:text="${task.priority.displayName}">优先级</span>
+                            </div>
+                            <div class="small text-muted d-flex flex-wrap gap-2">
+                                <span th:if="${task.assigneeName}">
+                                    <i class="fas fa-user"></i> <span th:text="${task.assigneeName}">指派人</span>
+                                </span>
+                                <span th:if="${task.dueDate}">
+                                    <i class="fas fa-calendar"></i> <span th:text="${task.dueDate}">截止日</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- IN_PROGRESS Column -->
+        <div class="col-md-4">
+            <div class="kanban-column" data-status="IN_PROGRESS">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold">
+                        <span class="badge badge-in-progress me-2">进行中</span>
+                        <span class="badge bg-secondary rounded-pill" th:text="${#lists.size(inProgressTasks)}">0</span>
+                    </h5>
+                </div>
+                <div class="sortable-list" data-status="IN_PROGRESS">
+                    <th:block th:if="${#lists.isEmpty(inProgressTasks)}">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-spinner fa-2x mb-2"></i>
+                            <p class="mb-0 small">暂无进行中的任务</p>
+                        </div>
+                    </th:block>
+                    <div th:each="task : ${inProgressTasks}"
+                         class="card kanban-card mb-2"
+                         th:classappend="'priority-' + ${task.priority.name()}"
+                         data-task-id="${task.id}"
+                         th:attr="data-task-id=${task.id}">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <a th:href="@{/tasks/{id}(id=${task.id})}"
+                                   class="text-decoration-none fw-bold text-dark stretched-link"
+                                   th:text="${task.title}">任务标题</a>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}"
+                                      th:text="${task.priority.displayName}">优先级</span>
+                            </div>
+                            <div class="small text-muted d-flex flex-wrap gap-2">
+                                <span th:if="${task.assigneeName}">
+                                    <i class="fas fa-user"></i> <span th:text="${task.assigneeName}">指派人</span>
+                                </span>
+                                <span th:if="${task.dueDate}">
+                                    <i class="fas fa-calendar"></i> <span th:text="${task.dueDate}">截止日</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DONE Column -->
+        <div class="col-md-4">
+            <div class="kanban-column" data-status="DONE">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold">
+                        <span class="badge badge-done me-2">已完成</span>
+                        <span class="badge bg-secondary rounded-pill" th:text="${#lists.size(doneTasks)}">0</span>
+                    </h5>
+                </div>
+                <div class="sortable-list" data-status="DONE">
+                    <th:block th:if="${#lists.isEmpty(doneTasks)}">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <p class="mb-0 small">暂无已完成的任务</p>
+                        </div>
+                    </th:block>
+                    <div th:each="task : ${doneTasks}"
+                         class="card kanban-card mb-2"
+                         th:classappend="'priority-' + ${task.priority.name()}"
+                         data-task-id="${task.id}"
+                         th:attr="data-task-id=${task.id}">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <a th:href="@{/tasks/{id}(id=${task.id})}"
+                                   class="text-decoration-none fw-bold text-dark stretched-link"
+                                   th:text="${task.title}">任务标题</a>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}"
+                                      th:text="${task.priority.displayName}">优先级</span>
+                            </div>
+                            <div class="small text-muted d-flex flex-wrap gap-2">
+                                <span th:if="${task.assigneeName}">
+                                    <i class="fas fa-user"></i> <span th:text="${task.assigneeName}">指派人</span>
+                                </span>
+                                <span th:if="${task.dueDate}">
+                                    <i class="fas fa-calendar"></i> <span th:text="${task.dueDate}">截止日</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        /* Initialize SortableJS for each column */
+        var columns = document.querySelectorAll('.sortable-list');
+        columns.forEach(function(column) {
+            new Sortable(column, {
+                group: 'kanban',
+                animation: 200,
+                ghostClass: 'kanban-ghost',
+                dragClass: 'kanban-drag',
+                onEnd: function(evt) {
+                    var taskId = evt.item.getAttribute('data-task-id');
+                    var newStatus = evt.to.getAttribute('data-status');
+
+                    /* Update the source column count badge */
+                    var fromCol = evt.from.closest('.kanban-column');
+                    var toCol = evt.to.closest('.kanban-column');
+                    updateCountBadge(fromCol);
+                    updateCountBadge(toCol);
+
+                    /* Optimistic UI: show a visual indicator */
+                    var card = evt.item;
+                    card.style.opacity = '0.6';
+
+                    /* POST to API */
+                    var headers = {};
+                    headers[getCsrfHeader()] = getCsrfToken();
+                    headers['Content-Type'] = 'application/json';
+
+                    fetch('/api/tasks/' + taskId + '/status', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                    .then(function(response) {
+                        if (!response.ok) throw new Error('Request failed');
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (data.success) {
+                            card.style.opacity = '1';
+                            showToast('任务状态已更新', 'success');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('API Error:', error);
+                        card.style.opacity = '1';
+                        showToast('状态更新失败，请重试', 'danger');
+                        /* Revert the move by moving the item back */
+                        var fromList = fromCol.querySelector('.sortable-list');
+                        if (fromList) {
+                            fromList.appendChild(evt.item);
+                            updateCountBadge(fromCol);
+                            updateCountBadge(toCol);
+                        }
+                    });
+                }
+            });
+        });
+
+        function updateCountBadge(column) {
+            if (!column) return;
+            var list = column.querySelector('.sortable-list');
+            var badge = column.querySelector('.rounded-pill');
+            if (list && badge) {
+                var count = list.querySelectorAll('.kanban-card').length;
+                badge.textContent = count;
+            }
+        }
+    });
+</script>
+</body>
+</html>

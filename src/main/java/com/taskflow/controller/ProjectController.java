@@ -2,6 +2,7 @@ package com.taskflow.controller;
 
 import com.taskflow.dto.ProjectDto;
 import com.taskflow.dto.TaskDto;
+import com.taskflow.dto.TaskFilter;
 import com.taskflow.entity.User;
 import com.taskflow.dao.UserRepository;
 import com.taskflow.service.ProjectService;
@@ -74,10 +75,10 @@ public class ProjectController {
     public String projectDetail(@PathVariable Long id,
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "50") int size,
-                                Model model, Authentication auth) {
+                                TaskFilter filter, Model model, Authentication auth) {
         ProjectDto project = projectService.findById(id);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<TaskDto> tasks = taskService.findByProjectId(id, pageable);
+        Page<TaskDto> tasks = taskService.findFiltered(id, filter, pageable);
         var members = projectService.getProjectMembers(id);
 
         // 获取所有用户（用于添加成员下拉框）
@@ -92,6 +93,7 @@ public class ProjectController {
         model.addAttribute("members", members);
         model.addAttribute("availableUsers", availableUsers);
         model.addAttribute("currentUsername", auth.getName());
+        model.addAttribute("filter", filter);
         model.addAttribute("title", "项目 - " + project.getName());
         model.addAttribute("content", "users/project-detail");
         return "layout/base";

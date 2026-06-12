@@ -32,8 +32,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" th:href="@{/my-tasks}">
+                            <i class="fas fa-tasks"></i> 我的任务
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" th:href="@{/projects}">
                             <i class="fas fa-folder"></i> 项目
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/calendar}">
+                            <i class="fas fa-calendar-alt"></i> 日历
                         </a>
                     </li>
                     <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
@@ -59,6 +69,22 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" th:href="@{/messages}">
+                            <i class="fas fa-envelope"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="font-size: 0.6rem; display: none;" id="messageBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" th:href="@{/dashboard(lang='zh')}">中文</a></li>
+                            <li><a class="dropdown-item" th:href="@{/dashboard(lang='en')}">English</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/profile}">
                             <i class="fas fa-user-circle"></i>
@@ -108,5 +134,25 @@
 
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script src="/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script>
+    // WebSocket connection (auto-connect if authenticated)
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Stomp !== 'undefined' && document.querySelector('meta[name="_csrf"]')) {
+            setTimeout(function() {
+                try {
+                    var socket = new SockJS('/ws');
+                    var stompClient = Stomp.over(socket);
+                    stompClient.connect({}, function() {
+                        console.log('WebSocket connected');
+                    });
+                } catch(e) {
+                    console.log('WebSocket not available');
+                }
+            }, 1000);
+        }
+    });
+    </script>
 </body>
 </html>

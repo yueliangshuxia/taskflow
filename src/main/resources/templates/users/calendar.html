@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <style>
+        .calendar-event-todo { background-color: #6b7280 !important; border-color: #6b7280 !important; }
+        .calendar-event-in_progress { background-color: #3b82f6 !important; border-color: #3b82f6 !important; }
+        .calendar-event-in_review { background-color: #f59e0b !important; border-color: #f59e0b !important; }
+        .calendar-event-done { background-color: #10b981 !important; border-color: #10b981 !important; }
+        #calendar { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .fc-event { cursor: pointer; padding: 2px 4px; font-size: 0.85rem; }
+        .fc-toolbar-title { font-size: 1.3rem !important; }
+    </style>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header-custom">
+        <h2><i class="fas fa-calendar-alt"></i> 日历视图</h2>
+        <p class="text-muted">按截止日期查看所有任务</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <!-- Event detail modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>状态：</strong><span id="eventStatus"></span></p>
+                    <p><strong>优先级：</strong><span id="eventPriority"></span></p>
+                    <p><strong>项目：</strong><span id="eventProject"></span></p>
+                    <p><strong>负责人：</strong><span id="eventAssignee"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" id="eventLink" class="btn btn-primary btn-sm">查看详情</a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script th:inline="javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'zh-cn',
+        firstDay: 1,
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,listMonth'
+        },
+        buttonText: {
+            today: '今天',
+            month: '月视图',
+            listMonth: '列表'
+        },
+        events: '/api/calendar/events',
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            var props = info.event.extendedProps;
+            document.getElementById('eventModalTitle').textContent = info.event.title;
+            document.getElementById('eventStatus').textContent = props.status || '-';
+            document.getElementById('eventPriority').textContent = props.priority || '-';
+            document.getElementById('eventProject').textContent = props.project || '-';
+            document.getElementById('eventAssignee').textContent = props.assignee || '-';
+            document.getElementById('eventLink').href = info.event.url || '#';
+            var modal = new bootstrap.Modal(document.getElementById('eventModal'));
+            modal.show();
+        },
+        noEventsText: '暂无到期任务',
+        loading: function(isLoading) {
+            if (isLoading) {
+                calendarEl.style.opacity = '0.5';
+            } else {
+                calendarEl.style.opacity = '1';
+            }
+        }
+    });
+    calendar.render();
+});
+</script>
+</body>
+</html>

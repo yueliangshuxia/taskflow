@@ -1,11 +1,14 @@
 package com.taskflow.dto;
 
+import com.taskflow.entity.Tag;
 import com.taskflow.entity.enums.TaskPriority;
 import com.taskflow.entity.enums.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class TaskDto {
@@ -31,4 +34,7 @@ public class TaskDto {
     private String creatorName;
 
     private LocalDate dueDate;
+    private LocalDateTime createdAt;
+
+    private List<Tag> tags;
 }

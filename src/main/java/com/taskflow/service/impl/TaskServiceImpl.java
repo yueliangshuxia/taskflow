@@ -2,6 +2,7 @@ package com.taskflow.service.impl;
 
 import com.taskflow.dto.TaskCreateDto;
 import com.taskflow.dto.TaskDto;
+import com.taskflow.dto.TaskFilter;
 import com.taskflow.entity.Project;
 import com.taskflow.entity.Task;
 import com.taskflow.entity.User;
@@ -17,6 +18,7 @@ import com.taskflow.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,17 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     public Page<TaskDto> findByProjectId(Long projectId, Pageable pageable) {
         Page<Task> tasks = taskRepository.findByProjectId(projectId, pageable);
+        return tasks.map(this::convertToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TaskDto> findFiltered(Long projectId, TaskFilter filter, Pageable pageable) {
+        Specification<Task> spec = TaskSpecification.withFilter(filter);
+        if (projectId != null) {
+            spec = spec.and(TaskSpecification.hasProjectId(projectId));
+        }
+        Page<Task> tasks = taskRepository.findAll(spec, pageable);
         return tasks.map(this::convertToDto);
     }
 
@@ -122,10 +135,25 @@ public class TaskServiceImpl implements TaskService {
         Task task = getTaskEntity(taskId);
         String taskTitle = task.getTitle();
         Long projectId = task.getProject() != null ? task.getProject().getId() : null;
-        taskRepository.delete(task);
+        task.setDeletedAt(java.time.LocalDateTime.now());
+        taskRepository.save(task);
 
         auditLogService.log("DELETE", "Task", taskId,
                 "删除任务: " + taskTitle + " (projectId=" + projectId + ")", username);
+    }
+
+    @Override
+    @Transactional
+    public void restoreTask(Long taskId) {
+        taskRepository.restoreById(taskId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TaskDto> findDeletedTasks() {
+        return taskRepository.findDeleted().stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override
@@ -174,6 +202,8 @@ public class TaskServiceImpl implements TaskService {
         dto.setAssigneeName(task.getAssignee() != null ? task.getAssignee().getDisplayName() : null);
         dto.setCreatorName(task.getCreator().getDisplayName());
         dto.setDueDate(task.getDueDate());
+        dto.setCreatedAt(task.getCreatedAt());
+        dto.setTags(List.copyOf(task.getTags()));
         return dto;
     }
 }

@@ -84,10 +84,28 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = getProjectEntity(projectId);
         checkOwner(project, username);
         String projectName = project.getName();
-        projectRepository.delete(project);
+        project.setDeletedAt(java.time.LocalDateTime.now());
+        projectRepository.save(project);
 
         auditLogService.log("DELETE", "Project", projectId,
                 "删除项目: " + projectName, username);
+    }
+
+    @Override
+    @Transactional
+    public void restoreProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("项目不存在或已永久删除"));
+        project.setDeletedAt(null);
+        projectRepository.save(project);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectDto> findDeletedProjects() {
+        return projectRepository.findDeleted().stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override

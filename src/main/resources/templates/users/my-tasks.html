@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header-custom">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-tasks"></i> 我的任务</h2>
+                <p>欢迎回来，<span sec:authentication="name"></span>！以下是你在所有项目中的任务</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- 待办 TODO -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100 fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                    <span><i class="fas fa-clock text-secondary"></i> 待办</span>
+                    <span class="badge badge-todo" th:text="${todoPage.totalElements}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <th:block th:if="${todoPage.totalElements == 0}">
+                        <div class="empty-state py-4">
+                            <i class="fas fa-inbox"></i>
+                            <h4>暂无待办任务</h4>
+                        </div>
+                    </th:block>
+                    <div th:unless="${todoPage.totalElements == 0}" class="list-group list-group-flush">
+                        <a th:each="task : ${todoPage.content}"
+                           th:href="@{/tasks/{id}(id=${task.id})}"
+                           class="list-group-item list-group-item-action px-3"
+                           th:classappend="'priority-' + ${task.priority.name()}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span class="fw-bold text-truncate me-2" th:text="${task.title}">任务标题</span>
+                                <span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}"
+                                      th:text="${task.priority.displayName}">优先级</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <small class="text-muted">
+                                    <i class="fas fa-folder-open"></i>
+                                    <span th:text="${task.projectName} ?: '无项目'">项目</span>
+                                </small>
+                                <small class="text-muted" th:if="${task.dueDate}">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span th:text="${task.dueDate}">截止日</span>
+                                </small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <th:block th:if="${todoPage.totalPages > 1}">
+                    <div class="card-footer bg-white">
+                        <nav>
+                            <ul class="pagination justify-content-center mb-0 pagination-sm">
+                                <li class="page-item" th:classappend="${todoPage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number - 1}, progressPage=${inProgressPage.number}, reviewPage=${inReviewPage.number}, donePage=${donePage.number})}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(0, todoPage.totalPages - 1)}"
+                                    class="page-item" th:classappend="${i == todoPage.number} ? 'active'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${i}, progressPage=${inProgressPage.number}, reviewPage=${inReviewPage.number}, donePage=${donePage.number})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${todoPage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number + 1}, progressPage=${inProgressPage.number}, reviewPage=${inReviewPage.number}, donePage=${donePage.number})}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <!-- 进行中 IN_PROGRESS -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100 fade-in" style="animation-delay: 0.1s">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                    <span><i class="fas fa-spinner text-primary"></i> 进行中</span>
+                    <span class="badge badge-in-progress" th:text="${inProgressPage.totalElements}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <th:block th:if="${inProgressPage.totalElements == 0}">
+                        <div class="empty-state py-4">
+                            <i class="fas fa-play-circle"></i>
+                            <h4>暂无进行中的任务</h4>
+                        </div>
+                    </th:block>
+                    <div th:unless="${inProgressPage.totalElements == 0}" class="list-group list-group-flush">
+                        <a th:each="task : ${inProgressPage.content}"
+                           th:href="@{/tasks/{id}(id=${task.id})}"
+                           class="list-group-item list-group-item-action px-3"
+                           th:classappend="'priority-' + ${task.priority.name()}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span class="fw-bold text-truncate me-2" th:text="${task.title}">任务标题</span>
+                                <span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}"
+                                      th:text="${task.priority.displayName}">优先级</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <small class="text-muted">
+                                    <i class="fas fa-folder-open"></i>
+                                    <span th:text="${task.projectName} ?: '无项目'">项目</span>
+                                </small>
+                                <small class="text-muted" th:if="${task.dueDate}">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span th:text="${task.dueDate}">截止日</span>
+                                </small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <th:block th:if="${inProgressPage.totalPages > 1}">
+                    <div class="card-footer bg-white">
+                        <nav>
+                            <ul class="pagination justify-content-center mb-0 pagination-sm">
+                                <li class="page-item" th:classappend="${inProgressPage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${inProgressPage.number - 1}, reviewPage=${inReviewPage.number}, donePage=${donePage.number})}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(0, inProgressPage.totalPages - 1)}"
+                                    class="page-item" th:classappend="${i == inProgressPage.number} ? 'active'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${i}, reviewPage=${inReviewPage.number}, donePage=${donePage.number})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${inProgressPage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${inProgressPage.number + 1}, reviewPage=${inReviewPage.number}, donePage=${donePage.number})}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <!-- 审核中 IN_REVIEW -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100 fade-in" style="animation-delay: 0.2s">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                    <span><i class="fas fa-search text-warning"></i> 审核中</span>
+                    <span class="badge badge-in-review" th:text="${inReviewPage.totalElements}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <th:block th:if="${inReviewPage.totalElements == 0}">
+                        <div class="empty-state py-4">
+                            <i class="fas fa-clipboard-check"></i>
+                            <h4>暂无审核中的任务</h4>
+                        </div>
+                    </th:block>
+                    <div th:unless="${inReviewPage.totalElements == 0}" class="list-group list-group-flush">
+                        <a th:each="task : ${inReviewPage.content}"
+                           th:href="@{/tasks/{id}(id=${task.id})}"
+                           class="list-group-item list-group-item-action px-3"
+                           th:classappend="'priority-' + ${task.priority.name()}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span class="fw-bold text-truncate me-2" th:text="${task.title}">任务标题</span>
+                                <span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}"
+                                      th:text="${task.priority.displayName}">优先级</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <small class="text-muted">
+                                    <i class="fas fa-folder-open"></i>
+                                    <span th:text="${task.projectName} ?: '无项目'">项目</span>
+                                </small>
+                                <small class="text-muted" th:if="${task.dueDate}">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span th:text="${task.dueDate}">截止日</span>
+                                </small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <th:block th:if="${inReviewPage.totalPages > 1}">
+                    <div class="card-footer bg-white">
+                        <nav>
+                            <ul class="pagination justify-content-center mb-0 pagination-sm">
+                                <li class="page-item" th:classappend="${inReviewPage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${inProgressPage.number}, reviewPage=${inReviewPage.number - 1}, donePage=${donePage.number})}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(0, inReviewPage.totalPages - 1)}"
+                                    class="page-item" th:classappend="${i == inReviewPage.number} ? 'active'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${inProgressPage.number}, reviewPage=${i}, donePage=${donePage.number})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${inReviewPage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${inProgressPage.number}, reviewPage=${inReviewPage.number + 1}, donePage=${donePage.number})}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <!-- 已完成 DONE -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100 fade-in" style="animation-delay: 0.3s">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                    <span><i class="fas fa-check-circle text-success"></i> 已完成</span>
+                    <span class="badge badge-done" th:text="${donePage.totalElements}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <th:block th:if="${donePage.totalElements == 0}">
+                        <div class="empty-state py-4">
+                            <i class="fas fa-check-double"></i>
+                            <h4>暂无已完成的任务</h4>
+                        </div>
+                    </th:block>
+                    <div th:unless="${donePage.totalElements == 0}" class="list-group list-group-flush">
+                        <a th:each="task : ${donePage.content}"
+                           th:href="@{/tasks/{id}(id=${task.id})}"
+                           class="list-group-item list-group-item-action px-3"
+                           th:classappend="'priority-' + ${task.priority.name()}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span class="fw-bold text-truncate me-2" th:text="${task.title}">任务标题</span>
+                                <span th:class="'badge badge-' + ${task.priority.name().toLowerCase()}"
+                                      th:text="${task.priority.displayName}">优先级</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <small class="text-muted">
+                                    <i class="fas fa-folder-open"></i>
+                                    <span th:text="${task.projectName} ?: '无项目'">项目</span>
+                                </small>
+                                <small class="text-muted" th:if="${task.dueDate}">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span th:text="${task.dueDate}">截止日</span>
+                                </small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <th:block th:if="${donePage.totalPages > 1}">
+                    <div class="card-footer bg-white">
+                        <nav>
+                            <ul class="pagination justify-content-center mb-0 pagination-sm">
+                                <li class="page-item" th:classappend="${donePage.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${inProgressPage.number}, reviewPage=${inReviewPage.number}, donePage=${donePage.number - 1})}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(0, donePage.totalPages - 1)}"
+                                    class="page-item" th:classappend="${i == donePage.number} ? 'active'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${inProgressPage.number}, reviewPage=${inReviewPage.number}, donePage=${i})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${donePage.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/my-tasks(todoPage=${todoPage.number}, progressPage=${inProgressPage.number}, reviewPage=${inReviewPage.number}, donePage=${donePage.number + 1})}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

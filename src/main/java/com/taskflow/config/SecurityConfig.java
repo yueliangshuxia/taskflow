@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.sql.DataSource;
 
@@ -25,16 +26,20 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final DataSource dataSource;
+    private final ApiTokenFilter apiTokenFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .addFilterBefore(apiTokenFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/login", "/register", "/css/**", "/js/**",
                     "/images/**", "/favicon.*", "/error",
-                    "/uploads/**"
+                    "/uploads/**", "/forgot-password", "/reset-password",
+                    "/ws/**"
                 ).permitAll()
+                .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

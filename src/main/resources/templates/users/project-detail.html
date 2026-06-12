@@ -27,11 +27,59 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-tasks text-primary"></i> 任务列表</span>
-                    <a th:href="@{/projects/{id}/tasks/create(id=${project.id})}" class="btn btn-sm btn-success">
-                        <i class="fas fa-plus"></i> 新建
-                    </a>
+                    <div class="d-flex gap-2 align-items-center">
+                        <a href="#" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#taskFilterBar" title="筛选">
+                            <i class="fas fa-filter"></i>
+                        </a>
+                        <a th:href="@{/projects/{id}/tasks/create(id=${project.id})}" class="btn btn-sm btn-success">
+                            <i class="fas fa-plus"></i> 新建
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
+                    <!-- 筛选栏 -->
+                    <div class="collapse" id="taskFilterBar">
+                        <form method="get" th:action="@{/projects/{id}(id=${project.id})}" class="mb-3 p-3 bg-light rounded">
+                            <input type="hidden" name="page" value="0">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <input type="text" name="keyword" class="form-control form-control-sm"
+                                           placeholder="搜索任务标题或描述..."
+                                           th:value="${filter.keyword}">
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="status" class="form-select form-select-sm">
+                                        <option value="">全部状态</option>
+                                        <option value="TODO" th:selected="${filter.status == 'TODO'}">待办</option>
+                                        <option value="IN_PROGRESS" th:selected="${filter.status == 'IN_PROGRESS'}">进行中</option>
+                                        <option value="IN_REVIEW" th:selected="${filter.status == 'IN_REVIEW'}">审核中</option>
+                                        <option value="DONE" th:selected="${filter.status == 'DONE'}">已完成</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="priority" class="form-select form-select-sm">
+                                        <option value="">全部优先级</option>
+                                        <option value="LOW" th:selected="${filter.priority == 'LOW'}">低</option>
+                                        <option value="MEDIUM" th:selected="${filter.priority == 'MEDIUM'}">中</option>
+                                        <option value="HIGH" th:selected="${filter.priority == 'HIGH'}">高</option>
+                                        <option value="URGENT" th:selected="${filter.priority == 'URGENT'}">紧急</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="assigneeId" class="form-select form-select-sm">
+                                        <option value="">全部负责人</option>
+                                        <option th:each="m : ${members}" th:value="${m.id}"
+                                                th:text="${m.displayName}"
+                                                th:selected="${filter.assigneeId == m.id}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100"><i class="fas fa-search"></i> 搜索</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                     <th:block th:if="${#lists.isEmpty(tasks)}">
                         <div class="empty-state">
                             <i class="fas fa-clipboard-list"></i>
@@ -130,6 +178,9 @@
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <a th:href="@{/projects/{id}/tasks/create(id=${project.id})}" class="btn btn-success"><i class="fas fa-plus"></i> 创建任务</a>
+                        <a th:href="@{/projects/{id}/gantt(id=${project.id})}" class="btn btn-outline-info"><i class="fas fa-chart-bar"></i> 甘特图</a>
+                        <a th:href="@{/export/project/{id}/tasks/excel(id=${project.id})}" class="btn btn-outline-success"><i class="fas fa-file-excel"></i> 导出Excel</a>
+                        <a th:href="@{/export/project/{id}/tasks/csv(id=${project.id})}" class="btn btn-outline-secondary"><i class="fas fa-file-csv"></i> 导出CSV</a>
                         <a th:href="@{/projects/{id}/edit(id=${project.id})}" class="btn btn-outline-primary"><i class="fas fa-edit"></i> 编辑项目</a>
                         <form method="post" th:action="@{/projects/{id}/delete(id=${project.id})}"
                               onsubmit="return confirm('确定要删除此项目吗？')">

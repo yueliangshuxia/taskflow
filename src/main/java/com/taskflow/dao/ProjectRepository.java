@@ -24,4 +24,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     @EntityGraph(attributePaths = {"owner"})
     Page<Project> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query("SELECT p FROM Project p WHERE p.deletedAt IS NOT NULL ORDER BY p.deletedAt DESC")
+    List<Project> findDeleted();
 }

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
@@ -55,4 +56,18 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
 
     @EntityGraph(attributePaths = {"project", "assignee", "creator"})
     Page<Task> findAllByStatusOrderByCreatedAtDesc(TaskStatus status, Pageable pageable);
+
+    // Soft-delete queries
+    @Query("SELECT t FROM Task t WHERE t.deletedAt IS NOT NULL ORDER BY t.deletedAt DESC")
+    List<Task> findDeleted();
+
+    @Query("SELECT t FROM Task t WHERE t.deletedAt IS NOT NULL AND t.project.id = :projectId ORDER BY t.deletedAt DESC")
+    List<Task> findDeletedByProjectId(@Param("projectId") Long projectId);
+
+    @Query("UPDATE Task t SET t.deletedAt = NULL WHERE t.id = :id")
+    @org.springframework.data.jpa.repository.Modifying
+    void restoreById(@Param("id") Long id);
+
+    @Query("SELECT t FROM Task t WHERE t.deletedAt IS NOT NULL AND t.deletedAt < :cutoff")
+    List<Task> findDeletedBefore(@Param("cutoff") LocalDateTime cutoff);
 }
