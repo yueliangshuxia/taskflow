@@ -43,45 +43,55 @@
                 </div>
                 <div class="card-body">
                     <div class="collapse" id="taskFilterBar">
-                        <form method="get" th:action="@{/projects/{id}(id=${project.id})}" class="mb-3 p-3 bg-light rounded">
-                            <input type="hidden" name="page" value="0">
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <input type="text" name="keyword" class="form-control form-control-sm"
-                                           th:placeholder="#{project.filter.search}" placeholder="搜索任务标题或描述..."
-                                           th:value="${filter.keyword}">
-                                </div>
-                                <div class="col-md-2">
-                                    <select name="status" class="form-select form-select-sm">
-                                        <option value="" th:text="#{project.filter.all.status}">全部状态</option>
-                                        <option value="TODO" th:selected="${filter.status == 'TODO'}" th:text="#{task.status.todo}">待办</option>
-                                        <option value="IN_PROGRESS" th:selected="${filter.status == 'IN_PROGRESS'}" th:text="#{task.status.in_progress}">进行中</option>
-                                        <option value="IN_REVIEW" th:selected="${filter.status == 'IN_REVIEW'}" th:text="#{task.status.in_review}">审核中</option>
-                                        <option value="DONE" th:selected="${filter.status == 'DONE'}" th:text="#{task.status.done}">已完成</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <select name="priority" class="form-select form-select-sm">
-                                        <option value="" th:text="#{project.filter.all.priority}">全部优先级</option>
-                                        <option value="LOW" th:selected="${filter.priority == 'LOW'}" th:text="#{task.priority.low}">低</option>
-                                        <option value="MEDIUM" th:selected="${filter.priority == 'MEDIUM'}" th:text="#{task.priority.medium}">中</option>
-                                        <option value="HIGH" th:selected="${filter.priority == 'HIGH'}" th:text="#{task.priority.high}">高</option>
-                                        <option value="URGENT" th:selected="${filter.priority == 'URGENT'}" th:text="#{task.priority.urgent}">紧急</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <select name="assigneeId" class="form-select form-select-sm">
-                                        <option value="" th:text="#{project.filter.all.assignee}">全部负责人</option>
-                                        <option th:each="m : ${members}" th:value="${m.id}"
-                                                th:text="${m.displayName}"
-                                                th:selected="${filter.assigneeId == m.id}"></option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-sm btn-primary w-100"><i class="fas fa-search"></i> <span th:text="#{project.filter.search.btn}">搜索</span></button>
-                                </div>
+                        <div id="vue-task-filter" class="position-relative">
+                            <!-- Loading overlay -->
+                            <div v-if="filtering" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                                 style="background: rgba(255,255,255,0.7); z-index: 10; border-radius: var(--radius);">
+                                <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                                <span class="small text-muted">{{ t('common.loading', '筛选...') }}</span>
                             </div>
-                        </form>
+                            <form ref="filterForm" method="get" th:action="@{/projects/{id}(id=${project.id})}" class="mb-3 p-3 bg-light rounded">
+                                <input type="hidden" name="page" value="0">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <input type="text" name="keyword" class="form-control form-control-sm"
+                                               th:placeholder="#{project.filter.search}" placeholder="搜索任务标题或描述..."
+                                               th:value="${filter.keyword}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="status" class="form-select form-select-sm">
+                                            <option value="" th:text="#{project.filter.all.status}">全部状态</option>
+                                            <option value="TODO" th:selected="${filter.status == 'TODO'}" th:text="#{task.status.todo}">待办</option>
+                                            <option value="IN_PROGRESS" th:selected="${filter.status == 'IN_PROGRESS'}" th:text="#{task.status.in_progress}">进行中</option>
+                                            <option value="IN_REVIEW" th:selected="${filter.status == 'IN_REVIEW'}" th:text="#{task.status.in_review}">审核中</option>
+                                            <option value="DONE" th:selected="${filter.status == 'DONE'}" th:text="#{task.status.done}">已完成</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="priority" class="form-select form-select-sm">
+                                            <option value="" th:text="#{project.filter.all.priority}">全部优先级</option>
+                                            <option value="LOW" th:selected="${filter.priority == 'LOW'}" th:text="#{task.priority.low}">低</option>
+                                            <option value="MEDIUM" th:selected="${filter.priority == 'MEDIUM'}" th:text="#{task.priority.medium}">中</option>
+                                            <option value="HIGH" th:selected="${filter.priority == 'HIGH'}" th:text="#{task.priority.high}">高</option>
+                                            <option value="URGENT" th:selected="${filter.priority == 'URGENT'}" th:text="#{task.priority.urgent}">紧急</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="assigneeId" class="form-select form-select-sm">
+                                            <option value="" th:text="#{project.filter.all.assignee}">全部负责人</option>
+                                            <option th:each="m : ${members}" th:value="${m.id}"
+                                                    th:text="${m.displayName}"
+                                                    th:selected="${filter.assigneeId == m.id}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-sm btn-primary w-100" :disabled="filtering">
+                                            <i class="fas fa-search"></i> <span th:text="#{project.filter.search.btn}">搜索</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <th:block th:if="${#lists.isEmpty(tasks)}">
@@ -195,6 +205,57 @@
             </div>
         </div>
     </div>
+
+    <!-- Vue: Task Filter auto-submit -->
+    <script>
+    (function() {
+        if (typeof Vue === 'undefined') return;
+        var filterEl = document.getElementById('vue-task-filter');
+        if (!filterEl) return;
+
+        var _t = window.__messages || {};
+        function t(key, fallback) { return _t[key] || fallback || key; }
+
+        Vue.createApp({
+            setup: function() {
+                var filtering = Vue.ref(false);
+                var formEl = Vue.ref(null);
+                var debounceTimer = null;
+
+                function autoSubmit() {
+                    if (!formEl.value) return;
+                    if (debounceTimer) clearTimeout(debounceTimer);
+                    filtering.value = true;
+                    debounceTimer = setTimeout(function() {
+                        formEl.value.submit();
+                    }, 400);
+                }
+
+                Vue.onMounted(function() {
+                    var form = filterEl.querySelector('form');
+                    if (!form) return;
+                    formEl.value = form;
+
+                    // Listen for changes on select/input fields
+                    var inputs = form.querySelectorAll('select, input[type="text"]');
+                    inputs.forEach(function(el) {
+                        el.addEventListener('change', autoSubmit);
+                        el.addEventListener('input', function() {
+                            // Debounce for text input
+                            if (debounceTimer) clearTimeout(debounceTimer);
+                            filtering.value = true;
+                            debounceTimer = setTimeout(function() {
+                                form.submit();
+                            }, 600);
+                        });
+                    });
+                });
+
+                return { filtering: filtering, formEl: formEl, t: t };
+            }
+        }).mount('#vue-task-filter');
+    })();
+    </script>
 </div>
 </body>
 </html>

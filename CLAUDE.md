@@ -128,7 +128,10 @@ static/
 │   └── style.css             # Custom CSS — CSS variables, gradient cards, priority classes
 ├── js/
 │   ├── bootstrap.bundle.min.js
-│   └── main.js              # CSRF helpers (getCsrfToken/getCsrfHeader), AJAX utils
+│   ├── main.js              # CSRF helpers (getCsrfToken/getCsrfHeader), AJAX utils
+│   ├── vue-utils.js          # Vue 3 共享 composable: useCsrf, useApi, useI18n, createVueApp
+│   ├── theme.js             # Dark mode toggle + localStorage persistence
+│   └── notifications.js     # (superseded by Vue notification component in base.html)
 ├── images/
 │   ├── empty-projects.svg   # Shown when project list is empty
 │   ├── empty-tasks.svg      # Shown when task list is empty
@@ -152,6 +155,7 @@ All user-facing pages use the **fragment layout pattern**: controllers set `mode
 - **Audit logging:** `AuditLogService` writes to `audit_logs` table. Injected into service impls and admin controllers at key mutation points (create/delete entities, status changes, role changes, member management). Viewable at `/admin/logs`. `ScheduledTaskService` cleans entries older than 90 days.
 - **Pagination:** Spring Data `Pageable` passed through controllers. Pagination fragment rendered with Thymeleaf.
 - **File upload:** Disk storage at `app.upload-dir` (default `{user.dir}/uploads`). UUID filenames. Max 10MB. Allowed extensions configured in `application.yml`.
+- **Vue 3 渐进增强:** Vue 3 通过 CDN (`unpkg.com/vue@3/dist/vue.global.prod.js`) 在 `base.html` 中全局加载，与 Thymeleaf 共存。每个页面在特定 DOM 元素上挂载独立的 Vue 应用（不冲突）。共享工具在 `vue-utils.js` 中提供 `useCsrf()`/`useApi()`/`useI18n()` composable。i18n 通过 `window.__messages` 桥接（`base.html` 中用 `th:inline="javascript"` 注入）。已 Vue 化的组件：任务状态更新、评论区域（AJAX）、通知下拉、看板拖拽、日历骨架屏、项目筛选自动提交。
 - **Static assets:** Bootstrap 5, Font Awesome 6 served locally from `/css/` and `/js/` (no CDN/webjars). Custom CSS in `style.css` with CSS variables, gradient stat cards, priority classes (`priority-LOW`, `priority-MEDIUM`, `priority-HIGH`, `priority-URGENT`).
 - **Dark mode:** Toggle button in navbar (🌙/☀️). Theme preference stored in `localStorage` via `theme.js`. CSS variables in `style.css` with `[data-theme="dark"]` overrides for all surfaces (cards, tables, navbars, modals). Loaded via `<script src="/js/theme.js">` + inline `ThemeManager.load()` call in base layout.
   - **⚠️ Bootstrap 表格暗色模式陷阱:** Bootstrap 5.3 的 `.table` 默认 `--bs-table-bg: var(--bs-body-bg)` = 白色。即使卡片背景已变暗，表格单元格仍会显示白色背景。必须在 `[data-theme="dark"] .table` 中设置 `--bs-table-bg: transparent`。类似地，`bg-light`、`bg-white` 也需要显式覆盖为深色。

@@ -69,6 +69,69 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav">
+                    <!-- Notifications -->
+                    <li class="nav-item dropdown" id="vue-notifications" style="display:none;"
+                        th:style="${#authorization.expression('isAuthenticated()')} ? '' : 'display:none;'">
+                        <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown"
+                           th:title="#{message.title}" title="通知">
+                            <i class="fas fa-bell"></i>
+                            <span v-if="unreadCount > 0"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="font-size: 0.6rem;">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="width: 340px;">
+                            <li><h6 class="dropdown-header">
+                                <i class="fas fa-bell me-1"></i> <span th:text="#{message.title}">通知</span>
+                                <span v-if="unreadCount > 0" class="badge bg-danger ms-1 small">{{ unreadCount }}</span>
+                            </h6></li>
+                            <li><hr class="dropdown-divider my-0"></li>
+
+                            <!-- Loading -->
+                            <li v-if="loading" class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                <div class="text-muted small mt-1">加载中...</div>
+                            </li>
+
+                            <!-- Error -->
+                            <li v-else-if="error" class="text-center py-3">
+                                <div class="text-danger small">{{ error }}</div>
+                                <button @click="fetchNotifications" class="btn btn-sm btn-outline-danger mt-1">
+                                    <i class="fas fa-redo"></i> {{ t('common.retry', '重试') }}
+                                </button>
+                            </li>
+
+                            <!-- Empty -->
+                            <li v-else-if="notifications.length === 0" class="text-center py-3">
+                                <i class="fas fa-inbox fs-2 text-muted mb-2 d-block"></i>
+                                <span class="text-muted small">暂无通知</span>
+                            </li>
+
+                            <!-- List -->
+                            <li v-else v-for="n in notifications" :key="n.id">
+                                <a class="dropdown-item" :class="{'notification-item': true, unread: !n.read}"
+                                   :href="notificationLink(n)" @click="!n.read && markAsRead(n.id)">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <div class="mt-1 flex-shrink-0"
+                                             :style="{ color: iconColor(n.type) }">
+                                            <i :class="'fas ' + iconClass(n.type)"></i>
+                                        </div>
+                                        <div class="flex-grow-1 min-width-0">
+                                            <div class="notification-text small">{{ n.message }}</div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">{{ formatTime(n.createdAt) }}</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+
+                            <li v-if="notifications.length > 0"><hr class="dropdown-divider my-0"></li>
+                            <li v-if="notifications.length > 0" class="text-center">
+                                <button @click="markAllRead" class="btn btn-sm btn-link py-1 text-decoration-none">
+                                    <i class="fas fa-check-double"></i> 全部标记为已读
+                                </button>
+                            </li>
+                        </ul>
+                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link position-relative" th:href="@{/messages}">
                             <i class="fas fa-envelope"></i>
@@ -141,8 +204,50 @@
 
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script src="/js/main.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="/js/vue-utils.js"></script>
     <script src="/js/theme.js"></script>
     <script>ThemeManager.load();</script>
+    <script th:inline="javascript">
+    // Vue i18n bridge — 从 Thymeleaf messages 注入到全局对象供 Vue 组件使用
+    window.__messages = {
+        // Common
+        'common.save': /*[[#{common.save}]]*/ 'Save',
+        'common.cancel': /*[[#{common.cancel}]]*/ 'Cancel',
+        'common.delete': /*[[#{common.delete}]]*/ 'Delete',
+        'common.edit': /*[[#{common.edit}]]*/ 'Edit',
+        'common.back': /*[[#{common.back}]]*/ 'Back',
+        'common.confirm': /*[[#{common.confirm}]]*/ 'Confirm',
+        'common.search': /*[[#{common.search}]]*/ 'Search',
+        'common.filter': /*[[#{common.filter}]]*/ 'Filter',
+        'common.submit': /*[[#{common.submit}]]*/ 'Submit',
+        'common.success': '操作成功',
+        'common.loading': '加载中...',
+        'common.retry': '重试',
+
+        // Task
+        'task.update.success': /*[[#{task.update.success}]]*/ 'Status updated successfully',
+        'task.update.fail': /*[[#{task.update.fail}]]*/ 'Update failed',
+        'task.request.fail': /*[[#{task.request.fail}]]*/ 'Request failed',
+        'task.delete.confirm': /*[[#{task.delete.confirm}]]*/ 'Are you sure?',
+        'task.comment.placeholder': /*[[#{task.comment.placeholder}]]*/ 'Write a comment...',
+        'task.comment.submit': /*[[#{task.comment.submit}]]*/ 'Post Comment',
+        'task.no.comments': /*[[#{task.no.comments}]]*/ 'No comments yet',
+        'task.no.description': /*[[#{task.no.description}]]*/ 'No description',
+        'task.status.update': /*[[#{task.status.update}]]*/ 'Update Status',
+        'task.status.todo': /*[[#{task.status.todo}]]*/ 'TODO',
+        'task.status.in_progress': /*[[#{task.status.in_progress}]]*/ 'In Progress',
+        'task.status.in_review': /*[[#{task.status.in_review}]]*/ 'In Review',
+        'task.status.done': /*[[#{task.status.done}]]*/ 'Done',
+
+        // Notification
+        'notification.unread': /*[[#{message.unread}]]*/ 'Unread',
+        'notification.no.messages': /*[[#{message.no.messages}]]*/ 'No messages',
+
+        // Error
+        'error.generic': /*[[#{error.generic}]]*/ 'Error'
+    };
+    </script>
     <script>
     function switchLanguage(lang) {
         var url = new URL(window.location.href);
@@ -152,6 +257,140 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <!-- Vue: Notification Dropdown -->
+    <script>
+    (function() {
+        if (typeof Vue === 'undefined') return;
+        var notifEl = document.getElementById('vue-notifications');
+        if (!notifEl) return;
+
+        var _t = window.__messages || {};
+        function __(key, fallback) { return _t[key] || fallback || key; }
+
+        var ICON_MAP = {
+            'TASK_ASSIGNED': 'fa-user-plus',
+            'TASK_COMMENTED': 'fa-comment',
+            'STATUS_CHANGED': 'fa-arrow-right',
+            'TASK_UPDATED': 'fa-pen'
+        };
+        var COLOR_MAP = {
+            'TASK_ASSIGNED': '#4f46e5',
+            'TASK_COMMENTED': '#06b6d4',
+            'STATUS_CHANGED': '#10b981',
+            'TASK_UPDATED': '#f59e0b'
+        };
+
+        function notifyLink(n) {
+            if (n.relatedEntityType === 'Task' && n.relatedEntityId) return '/tasks/' + n.relatedEntityId;
+            if (n.relatedEntityType === 'Project' && n.relatedEntityId) return '/projects/' + n.relatedEntityId;
+            return '#';
+        }
+        function iconClass(type) { return ICON_MAP[type] || 'fa-bell'; }
+        function iconColor(type) { return COLOR_MAP[type] || '#64748b'; }
+
+        function formatTime(dateTimeStr) {
+            if (!dateTimeStr) return '';
+            try {
+                var date = new Date(dateTimeStr);
+                var now = new Date();
+                var diff = now - date;
+                var minutes = Math.floor(diff / 60000);
+                var hours = Math.floor(diff / 3600000);
+                var days = Math.floor(diff / 86400000);
+                if (minutes < 1) return '刚刚';
+                if (minutes < 60) return minutes + '分钟前';
+                if (hours < 24) return hours + '小时前';
+                if (days < 7) return days + '天前';
+                return (date.getMonth()+1).toString().padStart(2,'0') + '-' + date.getDate().toString().padStart(2,'0') + ' ' +
+                       date.getHours().toString().padStart(2,'0') + ':' + date.getMinutes().toString().padStart(2,'0');
+            } catch(e) { return ''; }
+        }
+
+        function authHeaders() {
+            var h = { 'Accept': 'application/json' };
+            h[getCsrfHeader()] = getCsrfToken();
+            return h;
+        }
+
+        Vue.createApp({
+            setup: function() {
+                var unreadCount = Vue.ref(0);
+                var notifications = Vue.ref([]);
+                var loading = Vue.ref(false);
+                var error = Vue.ref(null);
+                var timer = null;
+
+                function fetchUnread() {
+                    fetch('/api/notifications/count', { headers: authHeaders() })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) { unreadCount.value = d.count || 0; })
+                    .catch(function() {});
+                }
+
+                function fetchNotifications() {
+                    loading.value = true;
+                    error.value = null;
+                    fetch('/api/notifications/recent', { headers: authHeaders() })
+                    .then(function(r) { if (!r.ok) throw new Error('Load failed'); return r.json(); })
+                    .then(function(data) {
+                        notifications.value = data || [];
+                        loading.value = false;
+                        var unread = (data || []).filter(function(n) { return !n.read; }).length;
+                        unreadCount.value = unread;
+                    })
+                    .catch(function(err) {
+                        error.value = err.message || '加载失败';
+                        loading.value = false;
+                    });
+                }
+
+                function markAsRead(id) {
+                    fetch('/api/notifications/' + id + '/read', {
+                        method: 'POST', headers: authHeaders()
+                    }).then(function(r) {
+                        if (r.ok) { fetchUnread(); fetchNotifications(); }
+                    }).catch(function() {});
+                }
+
+                function markAllRead() {
+                    fetch('/api/notifications/read-all', {
+                        method: 'POST', headers: authHeaders()
+                    }).then(function(r) {
+                        if (r.ok) { unreadCount.value = 0; fetchNotifications(); }
+                        if (typeof showToast === 'function') showToast('已全部标记为已读', 'success');
+                    }).catch(function() {});
+                }
+
+                Vue.onMounted(function() {
+                    fetchUnread();
+                    timer = setInterval(fetchUnread, 30000);
+                    notifEl.addEventListener('shown.bs.dropdown', fetchNotifications);
+                });
+
+                Vue.onUnmounted(function() {
+                    if (timer) clearInterval(timer);
+                    notifEl.removeEventListener('shown.bs.dropdown', fetchNotifications);
+                });
+
+                return {
+                    unreadCount: unreadCount,
+                    notifications: notifications,
+                    loading: loading,
+                    error: error,
+                    t: __,
+                    fetchNotifications: fetchNotifications,
+                    markAsRead: markAsRead,
+                    markAllRead: markAllRead,
+                    notificationLink: notifyLink,
+                    iconClass: iconClass,
+                    iconColor: iconColor,
+                    formatTime: formatTime
+                };
+            }
+        }).mount('#vue-notifications');
+    })();
+    </script>
     <script>
     // WebSocket connection (auto-connect if authenticated)
     document.addEventListener('DOMContentLoaded', function() {

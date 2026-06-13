@@ -4,13 +4,63 @@
     <meta charset="UTF-8">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
     <style>
+        #calendar { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .fc-event { cursor: pointer; padding: 2px 4px; font-size: 0.85rem; }
+        .fc-toolbar-title { font-size: 1.3rem !important; }
         .calendar-event-todo { background-color: #6b7280 !important; border-color: #6b7280 !important; }
         .calendar-event-in_progress { background-color: #3b82f6 !important; border-color: #3b82f6 !important; }
         .calendar-event-in_review { background-color: #f59e0b !important; border-color: #f59e0b !important; }
         .calendar-event-done { background-color: #10b981 !important; border-color: #10b981 !important; }
-        #calendar { max-width: 1100px; margin: 0 auto; padding: 20px; }
-        .fc-event { cursor: pointer; padding: 2px 4px; font-size: 0.85rem; }
-        .fc-toolbar-title { font-size: 1.3rem !important; }
+
+        /* Loading Skeleton */
+        .calendar-skeleton {
+            padding: 20px;
+        }
+        .calendar-skeleton .sk-header {
+            display: flex; gap: 8px; margin-bottom: 20px;
+        }
+        .calendar-skeleton .sk-header div {
+            height: 36px; background: var(--gray-200); border-radius: 6px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .calendar-skeleton .sk-grid table { width: 100%; border-collapse: collapse; }
+        .calendar-skeleton .sk-grid td {
+            height: 80px; background: var(--gray-100); border: 1px solid var(--gray-200);
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+        .calendar-skeleton .sk-grid td:nth-child(odd) { animation-delay: 0.2s; }
+        .calendar-skeleton .sk-header div:nth-child(1) { width: 120px; }
+        .calendar-skeleton .sk-header div:nth-child(2) { width: 200px; }
+        .calendar-skeleton .sk-header div:nth-child(3) { width: 100px; margin-left: auto; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        [data-theme="dark"] .calendar-skeleton .sk-header div,
+        [data-theme="dark"] .calendar-skeleton .sk-grid td {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        /* Event Detail (Vue modal replacement) */
+        .event-detail-overlay {
+            position: fixed; inset: 0; z-index: 1055;
+            background: rgba(0,0,0,0.4);
+            display: flex; align-items: center; justify-content: center;
+            animation: fadeIn 0.15s ease-out;
+        }
+        .event-detail-card {
+            background: #fff; border-radius: var(--radius-lg);
+            padding: 1.5rem; width: 360px; max-width: 90vw;
+            box-shadow: var(--shadow-xl);
+            animation: slideUp 0.2s ease-out;
+        }
+        [data-theme="dark"] .event-detail-card {
+            background: #1e293b; color: #e2e8f0;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -20,28 +70,52 @@
         <p class="text-muted" th:text="#{calendar.subtitle}">按截止日期查看所有任务</p>
     </div>
 
-    <div class="card">
-        <div class="card-body">
+    <div class="card" id="vue-calendar">
+        <!-- Loading Skeleton (Vue) -->
+        <div v-if="loading" class="calendar-skeleton">
+            <div class="sk-header">
+                <div></div><div></div><div></div>
+            </div>
+            <div class="sk-grid">
+                <table><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="card-body" :class="{ 'd-none': loading }">
             <div id="calendar"></div>
         </div>
-    </div>
 
-    <div class="modal fade" id="eventModal" tabindex="-1">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="eventModalTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- Event Detail Modal (Vue) -->
+        <div v-if="showDetail" class="event-detail-overlay" @click.self="closeDetail">
+            <div class="event-detail-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold">{{ detail.title }}</h5>
+                    <button @click="closeDetail" class="btn-close"></button>
                 </div>
-                <div class="modal-body">
-                    <p><strong th:text="#{calendar.event.status}">状态：</strong><span id="eventStatus"></span></p>
-                    <p><strong th:text="#{calendar.event.priority}">优先级：</strong><span id="eventPriority"></span></p>
-                    <p><strong th:text="#{calendar.event.project}">项目：</strong><span id="eventProject"></span></p>
-                    <p><strong th:text="#{calendar.event.assignee}">负责人：</strong><span id="eventAssignee"></span></p>
+                <div class="mb-2">
+                    <span class="text-muted small">{{ t('calendar.event.status', '状态') }}：</span>
+                    <span class="fw-semibold">{{ detail.status }}</span>
                 </div>
-                <div class="modal-footer">
-                    <a href="#" id="eventLink" class="btn btn-primary btn-sm" th:text="#{calendar.view.detail}">查看详情</a>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" th:text="#{calendar.close}">关闭</button>
+                <div class="mb-2">
+                    <span class="text-muted small">{{ t('calendar.event.priority', '优先级') }}：</span>
+                    <span class="fw-semibold">{{ detail.priority }}</span>
+                </div>
+                <div class="mb-2">
+                    <span class="text-muted small">{{ t('calendar.event.project', '项目') }}：</span>
+                    <span class="fw-semibold">{{ detail.project }}</span>
+                </div>
+                <div class="mb-3">
+                    <span class="text-muted small">{{ t('calendar.event.assignee', '负责人') }}：</span>
+                    <span class="fw-semibold">{{ detail.assignee }}</span>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a :href="detail.url" class="btn btn-primary btn-sm">
+                        <i class="fas fa-external-link-alt"></i> {{ t('calendar.view.detail', '查看详情') }}
+                    </a>
+                    <button @click="closeDetail" class="btn btn-secondary btn-sm">
+                        {{ t('calendar.close', '关闭') }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -50,46 +124,79 @@
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script th:inline="javascript">
-document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        locale: /*[[#{calendar.locale}]]*/ 'zh-cn',
-        firstDay: 1,
-        height: 'auto',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,listMonth'
-        },
-        buttonText: {
-            today: /*[[#{calendar.today}]]*/ '今天',
-            month: /*[[#{calendar.month}]]*/ '月视图',
-            listMonth: /*[[#{calendar.list}]]*/ '列表'
-        },
-        events: '/api/calendar/events',
-        eventClick: function(info) {
-            info.jsEvent.preventDefault();
-            var props = info.event.extendedProps;
-            document.getElementById('eventModalTitle').textContent = info.event.title;
-            document.getElementById('eventStatus').textContent = props.status || '-';
-            document.getElementById('eventPriority').textContent = props.priority || '-';
-            document.getElementById('eventProject').textContent = props.project || '-';
-            document.getElementById('eventAssignee').textContent = props.assignee || '-';
-            document.getElementById('eventLink').href = info.event.url || '#';
-            var modal = new bootstrap.Modal(document.getElementById('eventModal'));
-            modal.show();
-        },
-        noEventsText: /*[[#{calendar.no.events}]]*/ '暂无到期任务',
-        loading: function(isLoading) {
-            if (isLoading) {
-                calendarEl.style.opacity = '0.5';
-            } else {
-                calendarEl.style.opacity = '1';
-            }
+(function() {
+    if (typeof Vue === 'undefined') return;
+    var _t = window.__messages || {};
+    function t(key, fallback) { return _t[key] || fallback || key; }
+
+    Vue.createApp({
+        setup: function() {
+            var loading = Vue.ref(true);
+            var showDetail = Vue.ref(false);
+            var detail = Vue.reactive({ title: '', status: '', priority: '', project: '', assignee: '', url: '#' });
+            var calendar = null;
+
+            Vue.onMounted(function() {
+                var calendarEl = document.getElementById('calendar');
+
+                // FullCalendar loads events from /api/calendar/events
+                // Wrap in setTimeout to allow Vue to render first
+                setTimeout(function() {
+                    try {
+                        calendar = new FullCalendar.Calendar(calendarEl, {
+                            locale: /*[[#{calendar.locale}]]*/ 'zh-cn',
+                            firstDay: 1,
+                            height: 'auto',
+                            headerToolbar: {
+                                left: 'prev,next today',
+                                center: 'title',
+                                right: 'dayGridMonth,listMonth'
+                            },
+                            buttonText: {
+                                today: /*[[#{calendar.today}]]*/ '今天',
+                                month: /*[[#{calendar.month}]]*/ '月视图',
+                                listMonth: /*[[#{calendar.list}]]*/ '列表'
+                            },
+                            events: '/api/calendar/events',
+                            eventClick: function(info) {
+                                info.jsEvent.preventDefault();
+                                var props = info.event.extendedProps;
+                                Object.assign(detail, {
+                                    title: info.event.title,
+                                    status: props.status || '-',
+                                    priority: props.priority || '-',
+                                    project: props.project || '-',
+                                    assignee: props.assignee || '-',
+                                    url: info.event.url || '#'
+                                });
+                                showDetail.value = true;
+                            },
+                            noEventsText: /*[[#{calendar.no.events}]]*/ '暂无到期任务',
+                            loading: function(isLoading) {
+                                if (!isLoading) {
+                                    loading.value = false;
+                                }
+                            }
+                        });
+                        calendar.render();
+                    } catch(e) {
+                        loading.value = false;
+                        console.error('Calendar init error:', e);
+                    }
+                }, 100);
+            });
+
+            Vue.onUnmounted(function() {
+                if (calendar) calendar.destroy();
+            });
+
+            function closeDetail() { showDetail.value = false; }
+
+            return { loading: loading, showDetail: showDetail, detail: detail,
+                     t: t, closeDetail: closeDetail };
         }
-    });
-    calendar.render();
-});
+    }).mount('#vue-calendar');
+})();
 </script>
 </body>
 </html>
