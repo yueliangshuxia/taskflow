@@ -129,7 +129,7 @@
   color: #94a3b8 !important;
 }
 [data-theme="dark"] .footer {
-  background: #1e293b;
+  background: #1e293b !important;
   border-color: #334155;
 }
 [data-theme="dark"] .table-hover tbody tr:hover {
@@ -509,6 +509,11 @@ body {
 
 .slide-in {
   animation: slideIn 0.3s ease-out;
+}
+
+/* --- Vue v-cloak — hide mustache syntax before Vue mounts --- */
+[v-cloak] {
+  visibility: hidden !important;
 }
 
 /* --- Footer --- */

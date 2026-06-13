@@ -70,20 +70,34 @@
         <p class="text-muted" th:text="#{calendar.subtitle}">按截止日期查看所有任务</p>
     </div>
 
-    <div class="card" id="vue-calendar">
-        <!-- Loading Skeleton (Vue) -->
-        <div v-if="loading" class="calendar-skeleton">
-            <div class="sk-header">
+    <div class="card" id="vue-calendar" v-cloak style="position: relative; min-height: 400px;">
+        <!-- Calendar (always in DOM — hidden via CSS visibility during loading) -->
+        <div class="card-body" :class="{ 'invisible': loading && !loadError }">
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Loading Skeleton overlay (shows on top while FullCalendar loads) -->
+        <div v-if="loading && !loadError" class="calendar-skeleton position-absolute top-0 start-0 w-100 h-100"
+             style="z-index: 5; border-radius: var(--radius, 0.5rem);">
+            <div class="sk-header p-3">
                 <div></div><div></div><div></div>
             </div>
-            <div class="sk-grid">
-                <table><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>
+            <div class="sk-grid px-3 pb-3">
+                <table style="width:100%"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>
             </div>
         </div>
 
-        <!-- Calendar -->
-        <div class="card-body" :class="{ 'd-none': loading }">
-            <div id="calendar"></div>
+        <!-- Error state (CDN blocked or init failed) — overlay on top -->
+        <div v-else-if="loadError" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+             style="z-index: 5; border-radius: var(--radius, 0.5rem);">
+            <div class="text-center py-5 px-3">
+                <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+                <h5>{{ t('calendar.load.error', '日历加载失败') }}</h5>
+                <p class="text-muted small mb-3">{{ loadError }}</p>
+                <button @click="retryInit" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-redo"></i> {{ t('common.retry', '重试') }}
+                </button>
+            </div>
         </div>
 
         <!-- Event Detail Modal (Vue) -->
@@ -132,68 +146,106 @@
     Vue.createApp({
         setup: function() {
             var loading = Vue.ref(true);
+            var loadError = Vue.ref(null);
             var showDetail = Vue.ref(false);
             var detail = Vue.reactive({ title: '', status: '', priority: '', project: '', assignee: '', url: '#' });
             var calendar = null;
 
-            Vue.onMounted(function() {
+            function initCalendar() {
                 var calendarEl = document.getElementById('calendar');
-
-                // FullCalendar loads events from /api/calendar/events
-                // Wrap in setTimeout to allow Vue to render first
-                setTimeout(function() {
-                    try {
-                        calendar = new FullCalendar.Calendar(calendarEl, {
-                            locale: /*[[#{calendar.locale}]]*/ 'zh-cn',
-                            firstDay: 1,
-                            height: 'auto',
-                            headerToolbar: {
-                                left: 'prev,next today',
-                                center: 'title',
-                                right: 'dayGridMonth,listMonth'
-                            },
-                            buttonText: {
-                                today: /*[[#{calendar.today}]]*/ '今天',
-                                month: /*[[#{calendar.month}]]*/ '月视图',
-                                listMonth: /*[[#{calendar.list}]]*/ '列表'
-                            },
-                            events: '/api/calendar/events',
-                            eventClick: function(info) {
-                                info.jsEvent.preventDefault();
-                                var props = info.event.extendedProps;
-                                Object.assign(detail, {
-                                    title: info.event.title,
-                                    status: props.status || '-',
-                                    priority: props.priority || '-',
-                                    project: props.project || '-',
-                                    assignee: props.assignee || '-',
-                                    url: info.event.url || '#'
-                                });
-                                showDetail.value = true;
-                            },
-                            noEventsText: /*[[#{calendar.no.events}]]*/ '暂无到期任务',
-                            loading: function(isLoading) {
-                                if (!isLoading) {
-                                    loading.value = false;
-                                }
+                if (!calendarEl) { return; }
+                // 如果 FullCalendar CDN 未加载，显示错误
+                if (typeof FullCalendar === 'undefined' || !FullCalendar.Calendar) {
+                    loadError.value = 'FullCalendar 库加载失败，请检查网络连接';
+                    loading.value = false;
+                    return;
+                }
+                try {
+                    calendar = new FullCalendar.Calendar(calendarEl, {
+                        locale: /*[[#{calendar.locale}]]*/ 'zh-cn',
+                        firstDay: 1,
+                        height: 'auto',
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,listMonth'
+                        },
+                        buttonText: {
+                            today: /*[[#{calendar.today}]]*/ '今天',
+                            month: /*[[#{calendar.month}]]*/ '月视图',
+                            listMonth: /*[[#{calendar.list}]]*/ '列表'
+                        },
+                        events: '/api/calendar/events',
+                        eventClick: function(info) {
+                            info.jsEvent.preventDefault();
+                            var props = info.event.extendedProps;
+                            Object.assign(detail, {
+                                title: info.event.title,
+                                status: props.status || '-',
+                                priority: props.priority || '-',
+                                project: props.project || '-',
+                                assignee: props.assignee || '-',
+                                url: info.event.url || '#'
+                            });
+                            showDetail.value = true;
+                        },
+                        noEventsText: /*[[#{calendar.no.events}]]*/ '暂无到期任务',
+                        loading: function(isLoading) {
+                            if (!isLoading) {
+                                loading.value = false;
                             }
-                        });
-                        calendar.render();
-                    } catch(e) {
+                        },
+                        // 后端请求失败时隐藏骨架
+                        eventSourceFailure: function() {
+                            loading.value = false;
+                            loadError.value = t('calendar.load.data_error', '任务数据加载失败');
+                        }
+                    });
+                    calendar.render();
+                } catch(e) {
+                    loadError.value = '日历初始化失败: ' + (e.message || '未知错误');
+                    loading.value = false;
+                    console.error('Calendar init error:', e);
+                }
+            }
+
+            function retryInit() {
+                loadError.value = null;
+                loading.value = true;
+                if (calendar) { try { calendar.destroy(); } catch(e) {} calendar = null; }
+                // 重新加载 FullCalendar CDN（如果之前没加载成功）
+                if (typeof FullCalendar === 'undefined' || !FullCalendar.Calendar) {
+                    var script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js';
+                    script.onload = function() { initCalendar(); };
+                    script.onerror = function() {
+                        loadError.value = '日历库下载失败，请刷新页面重试';
                         loading.value = false;
-                        console.error('Calendar init error:', e);
-                    }
-                }, 100);
+                    };
+                    document.body.appendChild(script);
+                } else {
+                    initCalendar();
+                }
+            }
+
+            Vue.onMounted(function() {
+                initCalendar();
+                window.addEventListener('resize', function() {
+                    if (calendar) calendar.updateSize();
+                });
             });
 
             Vue.onUnmounted(function() {
-                if (calendar) calendar.destroy();
+                if (calendar) { calendar.destroy(); calendar = null; }
             });
 
             function closeDetail() { showDetail.value = false; }
 
-            return { loading: loading, showDetail: showDetail, detail: detail,
-                     t: t, closeDetail: closeDetail };
+            return {
+                loading: loading, loadError: loadError,
+                showDetail: showDetail, detail: detail,
+                t: t, closeDetail: closeDetail, retryInit: retryInit
+            };
         }
     }).mount('#vue-calendar');
 })();

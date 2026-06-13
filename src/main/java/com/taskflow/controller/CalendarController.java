@@ -48,12 +48,12 @@ public class CalendarController {
                     event.put("start", t.getDueDate().format(formatter));
                     event.put("url", "/tasks/" + t.getId());
                     event.put("className", "calendar-event-" + t.getStatus().name().toLowerCase());
-                    event.put("extendedProps", Map.of(
-                            "status", t.getStatus().getDisplayName(),
-                            "priority", t.getPriority().getDisplayName(),
-                            "project", t.getProjectName() != null ? t.getProjectName() : "",
-                            "assignee", t.getAssigneeName() != null ? t.getAssigneeName() : ""
-                    ));
+                    Map<String, Object> props = new HashMap<>();
+                    props.put("status", t.getStatus().getDisplayName());
+                    props.put("priority", t.getPriority().getDisplayName());
+                    props.put("project", t.getProjectName() != null ? t.getProjectName() : "");
+                    props.put("assignee", t.getAssigneeName() != null ? t.getAssigneeName() : "");
+                    event.put("extendedProps", props);
                     return event;
                 })
                 .collect(Collectors.toList());

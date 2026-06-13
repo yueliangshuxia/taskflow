@@ -75,7 +75,7 @@
                         <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown"
                            th:title="#{message.title}" title="通知">
                             <i class="fas fa-bell"></i>
-                            <span v-if="unreadCount > 0"
+                            <span v-if="unreadCount > 0" v-cloak
                                   class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                   style="font-size: 0.6rem;">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
                         </a>
@@ -189,6 +189,60 @@
             </div>
         </th:block>
 
+        <!-- Vue 3 CDN — loaded BEFORE content so page-fragment Vue scripts can use it -->
+        <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+        <script src="/js/vue-utils.js"></script>
+        <script th:inline="javascript">
+        // Vue i18n bridge — 从 Thymeleaf messages 注入到全局对象供 Vue 组件使用
+        window.__messages = {
+            // Common
+            'common.save': /*[[#{common.save}]]*/ 'Save',
+            'common.cancel': /*[[#{common.cancel}]]*/ 'Cancel',
+            'common.delete': /*[[#{common.delete}]]*/ 'Delete',
+            'common.edit': /*[[#{common.edit}]]*/ 'Edit',
+            'common.back': /*[[#{common.back}]]*/ 'Back',
+            'common.confirm': /*[[#{common.confirm}]]*/ 'Confirm',
+            'common.search': /*[[#{common.search}]]*/ 'Search',
+            'common.filter': /*[[#{common.filter}]]*/ 'Filter',
+            'common.submit': /*[[#{common.submit}]]*/ 'Submit',
+            'common.success': '操作成功',
+            'common.loading': '加载中...',
+            'common.retry': '重试',
+
+            // Task
+            'task.update.success': /*[[#{task.update.success}]]*/ 'Status updated successfully',
+            'task.update.fail': /*[[#{task.update.fail}]]*/ 'Update failed',
+            'task.request.fail': /*[[#{task.request.fail}]]*/ 'Request failed',
+            'task.delete.confirm': /*[[#{task.delete.confirm}]]*/ 'Are you sure?',
+            'task.comment.placeholder': /*[[#{task.comment.placeholder}]]*/ 'Write a comment...',
+            'task.comment.submit': /*[[#{task.comment.submit}]]*/ 'Post Comment',
+            'task.no.comments': /*[[#{task.no.comments}]]*/ 'No comments yet',
+            'task.no.description': /*[[#{task.no.description}]]*/ 'No description',
+            'task.status.update': /*[[#{task.status.update}]]*/ 'Update Status',
+            'task.status.todo': /*[[#{task.status.todo}]]*/ 'TODO',
+            'task.status.in_progress': /*[[#{task.status.in_progress}]]*/ 'In Progress',
+            'task.status.in_review': /*[[#{task.status.in_review}]]*/ 'In Review',
+            'task.status.done': /*[[#{task.status.done}]]*/ 'Done',
+
+            // Notification
+            'notification.unread': /*[[#{message.unread}]]*/ 'Unread',
+            'notification.no.messages': /*[[#{message.no.messages}]]*/ 'No messages',
+
+            // Calendar
+            'calendar.event.status': /*[[#{calendar.event.status}]]*/ '状态',
+            'calendar.event.priority': /*[[#{calendar.event.priority}]]*/ '优先级',
+            'calendar.event.project': /*[[#{calendar.event.project}]]*/ '项目',
+            'calendar.event.assignee': /*[[#{calendar.event.assignee}]]*/ '负责人',
+            'calendar.view.detail': /*[[#{calendar.view.detail}]]*/ '查看详情',
+            'calendar.close': /*[[#{calendar.close}]]*/ '关闭',
+            'calendar.load.error': '日历加载失败',
+            'calendar.load.data_error': '任务数据加载失败',
+
+            // Error
+            'error.generic': /*[[#{error.generic}]]*/ 'Error'
+        };
+        </script>
+
         <!-- Main Content -->
         <th:block th:replace="${content}"></th:block>
     </div>
@@ -204,50 +258,8 @@
 
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script src="/js/main.js"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="/js/vue-utils.js"></script>
     <script src="/js/theme.js"></script>
     <script>ThemeManager.load();</script>
-    <script th:inline="javascript">
-    // Vue i18n bridge — 从 Thymeleaf messages 注入到全局对象供 Vue 组件使用
-    window.__messages = {
-        // Common
-        'common.save': /*[[#{common.save}]]*/ 'Save',
-        'common.cancel': /*[[#{common.cancel}]]*/ 'Cancel',
-        'common.delete': /*[[#{common.delete}]]*/ 'Delete',
-        'common.edit': /*[[#{common.edit}]]*/ 'Edit',
-        'common.back': /*[[#{common.back}]]*/ 'Back',
-        'common.confirm': /*[[#{common.confirm}]]*/ 'Confirm',
-        'common.search': /*[[#{common.search}]]*/ 'Search',
-        'common.filter': /*[[#{common.filter}]]*/ 'Filter',
-        'common.submit': /*[[#{common.submit}]]*/ 'Submit',
-        'common.success': '操作成功',
-        'common.loading': '加载中...',
-        'common.retry': '重试',
-
-        // Task
-        'task.update.success': /*[[#{task.update.success}]]*/ 'Status updated successfully',
-        'task.update.fail': /*[[#{task.update.fail}]]*/ 'Update failed',
-        'task.request.fail': /*[[#{task.request.fail}]]*/ 'Request failed',
-        'task.delete.confirm': /*[[#{task.delete.confirm}]]*/ 'Are you sure?',
-        'task.comment.placeholder': /*[[#{task.comment.placeholder}]]*/ 'Write a comment...',
-        'task.comment.submit': /*[[#{task.comment.submit}]]*/ 'Post Comment',
-        'task.no.comments': /*[[#{task.no.comments}]]*/ 'No comments yet',
-        'task.no.description': /*[[#{task.no.description}]]*/ 'No description',
-        'task.status.update': /*[[#{task.status.update}]]*/ 'Update Status',
-        'task.status.todo': /*[[#{task.status.todo}]]*/ 'TODO',
-        'task.status.in_progress': /*[[#{task.status.in_progress}]]*/ 'In Progress',
-        'task.status.in_review': /*[[#{task.status.in_review}]]*/ 'In Review',
-        'task.status.done': /*[[#{task.status.done}]]*/ 'Done',
-
-        // Notification
-        'notification.unread': /*[[#{message.unread}]]*/ 'Unread',
-        'notification.no.messages': /*[[#{message.no.messages}]]*/ 'No messages',
-
-        // Error
-        'error.generic': /*[[#{error.generic}]]*/ 'Error'
-    };
-    </script>
     <script>
     function switchLanguage(lang) {
         var url = new URL(window.location.href);

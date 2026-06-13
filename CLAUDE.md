@@ -155,19 +155,28 @@ All user-facing pages use the **fragment layout pattern**: controllers set `mode
 - **Audit logging:** `AuditLogService` writes to `audit_logs` table. Injected into service impls and admin controllers at key mutation points (create/delete entities, status changes, role changes, member management). Viewable at `/admin/logs`. `ScheduledTaskService` cleans entries older than 90 days.
 - **Pagination:** Spring Data `Pageable` passed through controllers. Pagination fragment rendered with Thymeleaf.
 - **File upload:** Disk storage at `app.upload-dir` (default `{user.dir}/uploads`). UUID filenames. Max 10MB. Allowed extensions configured in `application.yml`.
-- **Vue 3 渐进增强:** Vue 3 通过 CDN (`unpkg.com/vue@3/dist/vue.global.prod.js`) 在 `base.html` 中全局加载，与 Thymeleaf 共存。每个页面在特定 DOM 元素上挂载独立的 Vue 应用（不冲突）。共享工具在 `vue-utils.js` 中提供 `useCsrf()`/`useApi()`/`useI18n()` composable。i18n 通过 `window.__messages` 桥接（`base.html` 中用 `th:inline="javascript"` 注入）。已 Vue 化的组件：任务状态更新、评论区域（AJAX）、通知下拉、看板拖拽、日历骨架屏、项目筛选自动提交。
-- **Static assets:** Bootstrap 5, Font Awesome 6 served locally from `/css/` and `/js/` (no CDN/webjars). Custom CSS in `style.css` with CSS variables, gradient stat cards, priority classes (`priority-LOW`, `priority-MEDIUM`, `priority-HIGH`, `priority-URGENT`).
+- **Vue 3 渐进增强:** Vue 3 通过 CDN (`unpkg.com/vue@3/dist/vue.global.prod.js`) 全局加载，与 Thymeleaf 共存。每个页面在特定 DOM 元素上挂载独立的 `Vue.createApp()`。共享工具在 `vue-utils.js` 中提供 `useCsrf()`/`useApi()`/`useI18n()`/`useToast()` composable。i18n 通过 `window.__messages` 桥接（`base.html` 中用 `th:inline="javascript"` 注入约 30 个常用键）。
+  - **⚠️ 脚本加载顺序:** Vue CDN 和 `window.__messages` 必须在 `base.html` 的 `<th:block th:replace="${content}">` **之前**加载（已在 `base.html` 中修复）。每个页面碎片中的 Vue 脚本在嵌入位置立即执行，如果 Vue 尚未加载，`{{ }}` 语法会原样暴露。
+  - **`v-cloak` 模式:** 所有 Vue 根元素添加 `v-cloak` 属性，配合 CSS `[v-cloak] { visibility: hidden !important; }` 防止 Vue 挂载前的模板语法闪烁。
+  - 已 Vue 化的组件：
+  - **通知下拉** (`base.html#vue-notifications`): 30s 轮询未读数，`shown.bs.dropdown` 时拉取列表，响应式 badge，全部标记已读
+  - **任务状态更新** (`task-detail.html#vue-task-status`): `<select>` v-model 绑定，乐观 UI，spinner 反馈，3s 自动清除消息
+  - **评论区域** (`task-detail.html#vue-comments`): 5 状态 (loading/error/empty/list)，Ctrl+Enter 快捷发送，新评论 prepend
+  - **看板** (`kanban.html#kanban-board`): Vue 管理列计数 + 空状态提示，`onMounted` 初始化 SortableJS，拖拽后 AJAX 更新 + 失败回退
+  - **日历** (`calendar.html#vue-calendar`): 骨架屏 loading 态，`onMounted` 初始化 FullCalendar，事件点击 Vue 弹窗替代 Bootstrap Modal
+  - **项目筛选** (`project-detail.html#vue-task-filter`): 响应式 loading 遮罩，select change 直接提交，text input 600ms debounce 自动提交
+- **Static assets:** Bootstrap 5 served locally from `/css/`. Font Awesome 6 from CDN (`cdnjs`). Custom CSS in `style.css` with CSS variables, gradient stat cards, priority classes (`priority-LOW`, `priority-MEDIUM`, `priority-HIGH`, `priority-URGENT`).
 - **Dark mode:** Toggle button in navbar (🌙/☀️). Theme preference stored in `localStorage` via `theme.js`. CSS variables in `style.css` with `[data-theme="dark"]` overrides for all surfaces (cards, tables, navbars, modals). Loaded via `<script src="/js/theme.js">` + inline `ThemeManager.load()` call in base layout.
   - **⚠️ Bootstrap 表格暗色模式陷阱:** Bootstrap 5.3 的 `.table` 默认 `--bs-table-bg: var(--bs-body-bg)` = 白色。即使卡片背景已变暗，表格单元格仍会显示白色背景。必须在 `[data-theme="dark"] .table` 中设置 `--bs-table-bg: transparent`。类似地，`bg-light`、`bg-white` 也需要显式覆盖为深色。
 - **WebSocket:** Configured in `WebSocketConfig` with `/ws` endpoint and SockJS fallback. Used for real-time task update notifications. StompJS client in browser subscribes to `/topic/tasks/{taskId}`.
-- **REST API controllers:** `TaskRestController` (AJAX task status updates, CRUD via `/api/tasks`), `TagRestController` (tag CRUD via `/api/tags`), `NotificationRestController` (unread count, mark-read via `/api/notifications`), `TaskApiController` (API-token authenticated external access via `/api/external/tasks`). CSRF token passed via meta tags and helpers in `main.js`.
+- **REST API controllers:** `TaskRestController` (AJAX task status updates, CRUD via `/api/tasks`), `TagRestController` (tag CRUD via `/api/tags`), `NotificationRestController` (unread count, mark-read via `/api/notifications`), `CommentRestController` (GET/POST `/api/tasks/{taskId}/comments`), `TaskApiController` (API-token authenticated external access via `/api/external/tasks`). CSRF token passed via meta tags and helpers in `main.js`.
 - **In-app messaging:** `MessageController` handles compose, inbox, sent, read/delete between users. `MessageRepository` with `@EntityGraph` to eagerly load sender/recipient. `@Modifying` `markAsRead` requires `@Transactional` override on the controller method.
 - **Password reset flow:** `PasswordResetController` handles "forgot password" form → generates `PasswordResetToken` (expires 24h) → sends email via `JavaMailSender` → `GET /reset-password?token=` form → `POST` to set new password. Token repository uses `@EntityGraph(attributePaths = {"user"})` to avoid LazyInitializationException.
 - **Export:** `ExportController` uses Apache POI (`poi-ooxml`) for Excel export of task lists via `XSSFWorkbook`.
 - **Profiles:** `dev` (default) — DEBUG logging, cache off, ddl-auto=update. `prod` — INFO logging, cache on, ddl-auto=validate.
 - **Data seeding:** `DataInitializer` (CommandLineRunner) creates admin + demo users when DB is empty.
 - **Scheduling:** `ScheduledTaskService` cleans old audit logs (90d) and visit logs (30d) daily at 3 AM.
-- **Kanban board:** `/tasks/kanban` endpoint returns grouped task data (TODO/IN_PROGRESS/DONE). Frontend renders draggable columns via Bootstrap grid. Status updates via the same AJAX `TaskRestController` pattern.
+- **Kanban board:** `/projects/{projectId}/kanban` — `KanbanController` groups tasks by status (TODO/IN_PROGRESS/IN_REVIEW/DONE), sorts by priority. Frontend uses SortableJS (CDN) for drag-and-drop, Vue 3 manages column count badges and empty-state visibility. Status update on drag via `POST /api/tasks/{id}/status` with optimistic UI + revert on failure.
 - **FullCalendar:** `/calendar` endpoint loads tasks as JSON events. FullCalendar JS library renders month/week/day views. Clicking an event navigates to task detail. i18n keys for calendar labels passed via `th:inline="javascript"`.
 - **Gantt chart:** `/gantt` endpoint loads project tasks with start/end dates. Rendered via `frappe-gantt` JS library. Dynamic via `th:inline="javascript"` for data injection.
 - **`mapper/` and `validator/` packages:** Package directories exist but are currently empty — planned for future Entity-DTO mapping utilities and custom validation annotations.
@@ -193,13 +202,16 @@ All `@ManyToOne` / `@OneToMany` use `FetchType.LAZY`. N+1 mitigated by `@EntityG
 | `/forgot-password`, `/reset-password` | Public | Password reset flow (email token) |
 | `/dashboard` | Authenticated | User dashboard with Chart.js |
 | `/projects/**` | Authenticated | Project CRUD + members |
-| `/tasks/**` | Authenticated | Task CRUD + comments + attachments, Kanban board |
+| `/tasks/**` | Authenticated | Task CRUD + comments + attachments (task detail page has Vue status updater + Vue comments) |
+| `/projects/{projectId}/kanban` | Authenticated | Kanban board with drag-to-reorder (SortableJS + Vue count management) |
 | `/messages/**` | Authenticated | In-app messaging (compose, inbox, sent) |
 | `/calendar` | Authenticated | FullCalendar.js task deadline view |
 | `/gantt` | Authenticated | Gantt chart for project tasks |
 | `/profile` | Authenticated | Edit profile |
 | `/export/tasks` | Authenticated | Excel export via Apache POI |
-| `/api/tasks/**`, `/api/tags/**` | Authenticated | AJAX endpoints (status updates, tag CRUD) |
+| `/api/tasks/**` | Authenticated | AJAX endpoints (status updates, task CRUD, **comments** via `CommentRestController`) |
+| `/api/tags/**` | Authenticated | Tag CRUD via `TagRestController` |
+| `/api/notifications/**` | Authenticated | Unread count, mark-read, recent list |
 | `/api/external/tasks` | API Token | External API access via `ApiTokenFilter` |
 | `/admin/**` | ADMIN role | Admin dashboard, user/project/task management, logs |
 

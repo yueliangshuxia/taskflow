@@ -20,7 +20,8 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
 
     Page<Task> findByAssigneeId(Long assigneeId, Pageable pageable);
 
-    @Query("SELECT t FROM Task t WHERE t.assignee.id = :userId OR t.creator.id = :userId")
+    @Query(value = "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.creator WHERE t.assignee.id = :userId OR t.creator.id = :userId",
+           countQuery = "SELECT COUNT(DISTINCT t) FROM Task t WHERE t.assignee.id = :userId OR t.creator.id = :userId")
     Page<Task> findAccessibleTasks(@Param("userId") Long userId, Pageable pageable);
 
     long countByCreatorIdAndStatus(Long creatorId, TaskStatus status);
@@ -48,7 +49,7 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @Query("SELECT COUNT(t) FROM Task t WHERE (t.creator.id = :userId OR t.assignee.id = :userId) AND t.status = :status")
     long countAccessibleTasksByStatus(@Param("userId") Long userId, @Param("status") TaskStatus status);
 
-    @Query("SELECT t FROM Task t WHERE t.project.id = :projectId")
+    @Query("SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.creator WHERE t.project.id = :projectId")
     List<Task> findAllByProjectId(@Param("projectId") Long projectId);
 
     @EntityGraph(attributePaths = {"project", "assignee", "creator"})
